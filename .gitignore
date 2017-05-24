@@ -1,0 +1,7 @@
+*.html
+*.pyc
+logs
+*.js
+*.png
+*.css
+*.db
