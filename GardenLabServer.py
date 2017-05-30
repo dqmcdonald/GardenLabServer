@@ -45,6 +45,8 @@ import sys
 
 import GardenLabDB
 
+table = None
+
 
 def make_request_handler_class(opts):
     '''
@@ -284,6 +286,9 @@ def make_request_handler_class(opts):
             '''
             Handle POST requests.
             '''
+
+            global table
+            
             logging.debug('POST %s' % (self.path))
 
             # CITATION: http://stackoverflow.com/questions/4233218/python-basehttprequesthandler-post-variables
@@ -305,6 +310,9 @@ def make_request_handler_class(opts):
                 for key in sorted(postvars):
                     logging.debug('ARG[%d] %s=%s' % (i, key, postvars[key]))
                     i += 1
+
+            GardenLabDB.insert_data_from_dict( self.table, postvars )
+
 
             # Tell the browser everything is okay and that there is
             # HTML to display.
@@ -395,6 +403,8 @@ def httpd(opts):
     '''
     RequestHandlerClass = make_request_handler_class(opts)
     server = BaseHTTPServer.HTTPServer((opts.host, opts.port), RequestHandlerClass)
+    RequestHandlerClass.table = GardenLabDB.open_database() 
+
     logging.info('Server starting %s:%s (level=%s)' % (opts.host, opts.port, opts.level))
     try:
         server.serve_forever()
@@ -478,6 +488,8 @@ def main():
     if opts.daemonize:
         daemonize(opts)
     logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=get_logging_level(opts))
+    
+
     httpd(opts)
 
 
