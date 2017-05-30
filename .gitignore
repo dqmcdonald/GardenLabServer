@@ -1,7 +1,9 @@
 *.html
 *.pyc
 logs
-*.js
 *.png
-*.css
+*.jpg
 *.db
+*.sqlite
+fonts
+originals
