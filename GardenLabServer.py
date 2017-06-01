@@ -311,7 +311,7 @@ def make_request_handler_class(opts):
                     logging.debug('ARG[%d] %s=%s' % (i, key, postvars[key]))
                     i += 1
 
-            GardenLabDB.insert_data_from_dict( self.table, postvars )
+            GardenLabDB.insert_data_from_dict( postvars )
 
 
             # Tell the browser everything is okay and that there is
@@ -403,8 +403,7 @@ def httpd(opts):
     '''
     RequestHandlerClass = make_request_handler_class(opts)
     server = BaseHTTPServer.HTTPServer((opts.host, opts.port), RequestHandlerClass)
-    RequestHandlerClass.table = GardenLabDB.open_database() 
-
+ 
     logging.info('Server starting %s:%s (level=%s)' % (opts.host, opts.port, opts.level))
     try:
         server.serve_forever()
