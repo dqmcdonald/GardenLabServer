@@ -42,10 +42,12 @@ import cgi
 import logging
 import os
 import sys
+import datetime
 
 import GardenLabDB
 
-table = None
+last_db_update = datetime.datetime.now()
+
 
 
 def make_request_handler_class(opts):
@@ -61,6 +63,7 @@ def make_request_handler_class(opts):
         additional class variables.
         '''
         m_opts = opts
+        
 
         def do_HEAD(self):
             '''
@@ -79,34 +82,45 @@ def make_request_handler_class(opts):
             '''
             self.wfile.write('<html>')
             self.wfile.write('  <head>')
-            self.wfile.write('    <title>Server Info</title>')
+            self.wfile.write('    <title>GardenLab Server Info</title>')
             self.wfile.write('  </head>')
             self.wfile.write('  <body>')
             self.wfile.write('    <table>')
             self.wfile.write('      <tbody>')
             self.wfile.write('        <tr>')
-            self.wfile.write('          <td>client_address</td>')
+            self.wfile.write('          <td>Client_address:</td>')
             self.wfile.write('          <td>%r</td>' % (repr(self.client_address)))
             self.wfile.write('        </tr>')
             self.wfile.write('        <tr>')
-            self.wfile.write('          <td>command</td>')
+            self.wfile.write('          <td>Command:</td>')
             self.wfile.write('          <td>%r</td>' % (repr(self.command)))
             self.wfile.write('        </tr>')
             self.wfile.write('        <tr>')
-            self.wfile.write('          <td>headers</td>')
+            self.wfile.write('          <td>Headers</td>')
             self.wfile.write('          <td>%r</td>' % (repr(self.headers)))
             self.wfile.write('        </tr>')
             self.wfile.write('        <tr>')
-            self.wfile.write('          <td>path</td>')
+            self.wfile.write('          <td>Path</td>')
             self.wfile.write('          <td>%r</td>' % (repr(self.path)))
             self.wfile.write('        </tr>')
             self.wfile.write('        <tr>')
-            self.wfile.write('          <td>server_version</td>')
+            self.wfile.write('          <td>Server_version</td>')
             self.wfile.write('          <td>%r</td>' % (repr(self.server_version)))
             self.wfile.write('        </tr>')
             self.wfile.write('        <tr>')
-            self.wfile.write('          <td>sys_version</td>')
+            self.wfile.write('          <td>Sys_version</td>')
             self.wfile.write('          <td>%r</td>' % (repr(self.sys_version)))
+            self.wfile.write('        </tr>')
+            self.wfile.write('        <tr>')
+            self.wfile.write('          <td>Database records:</td>')
+            self.wfile.write('          <td>%d</td>' % (
+                GardenLabDB.count_records()))
+            self.wfile.write('        </tr>')
+            self.wfile.write('        </tr>')
+            self.wfile.write('        <tr>')
+            self.wfile.write('          <td>Last add:</td>')
+            self.wfile.write('          <td>%s</td>' % (
+                str(last_db_update)))
             self.wfile.write('        </tr>')
             self.wfile.write('      </tbody>')
             self.wfile.write('    </table>')
@@ -143,143 +157,12 @@ def make_request_handler_class(opts):
                     logging.debug('ARG[%d] %s=%s' % (i, key, args[key]))
                     i += 1
 
-            # Check to see whether the file is stored locally,
-            # if it is, display it.
-            # There is special handling for http://127.0.0.1/info. That URL
-            # displays some internal information.
-            if self.path == '/info' or self.path == '/info/':
-                self.send_response(200)  # OK
-                self.send_header('Content-type', 'text/html')
-                self.end_headers()
-                self.info()
-            elif self.path.startswith('/input') or self.path.startswith('/input/'):
-                logging.debug('Got database input request')
-                self.send_response(200)  # OK
-            else:
-                # Get the file path.
-                path = MyRequestHandler.m_opts.rootdir + rpath
-                dirpath = None
-                logging.debug('FILE %s' % (path))
- 
-                # If it is a directory look for index.html
-                # or process it directly if there are 3
-                # trailing slashed.
-                if rpath[-3:] == '///':
-                    dirpath = path
-                elif os.path.exists(path) and os.path.isdir(path):
-                    dirpath = path  # the directory portion
-                    index_files = ['/index.html', '/index.htm', ]
-                    for index_file in index_files:
-                        tmppath = path + index_file
-                        if os.path.exists(tmppath):
-                            path = tmppath
-                            break
- 
-                # Allow the user to type "///" at the end to see the
-                # directory listing.
-                if os.path.exists(path) and os.path.isfile(path):
-                    # This is valid file, send it as the response
-                    # after determining whether it is a type that
-                    # the server recognizes.
-                    _, ext = os.path.splitext(path)
-                    ext = ext.lower()
-                    content_type = {
-                        '.css': 'text/css',
-                        '.gif': 'image/gif',
-                        '.htm': 'text/html',
-                        '.html': 'text/html',
-                        '.jpeg': 'image/jpeg',
-                        '.jpg': 'image/jpg',
-                        '.js': 'text/javascript',
-                        '.png': 'image/png',
-                        '.text': 'text/plain',
-                        '.txt': 'text/plain',
-                    }
- 
-                    # If it is a known extension, set the correct
-                    # content type in the response.
-                    if ext in content_type:
-                        self.send_response(200)  # OK
-                        self.send_header('Content-type', content_type[ext])
-                        self.end_headers()
- 
-                        with open(path) as ifp:
-                            self.wfile.write(ifp.read())
-                    else:
-                        # Unknown file type or a directory.
-                        # Treat it as plain text.
-                        self.send_response(200)  # OK
-                        self.send_header('Content-type', 'text/plain')
-                        self.end_headers()
- 
-                        with open(path) as ifp:
-                            self.wfile.write(ifp.read())
-                else:
-                    if dirpath is None or self.m_opts.no_dirlist == True:
-                        # Invalid file path, respond with a server access error
-                        self.send_response(500)  # generic server error for now
-                        self.send_header('Content-type', 'text/html')
-                        self.end_headers()
- 
-                        self.wfile.write('<html>')
-                        self.wfile.write('  <head>')
-                        self.wfile.write('    <title>Server Access Error</title>')
-                        self.wfile.write('  </head>')
-                        self.wfile.write('  <body>')
-                        self.wfile.write('    <p>Server access error.</p>')
-                        self.wfile.write('    <p>%r</p>' % (repr(self.path)))
-                        self.wfile.write('    <p><a href="%s">Back</a></p>' % (rpath))
-                        self.wfile.write('  </body>')
-                        self.wfile.write('</html>')
-                    else:
-                        # List the directory contents. Allow simple navigation.
-                        logging.debug('DIR %s' % (dirpath))
- 
-                        self.send_response(200)  # OK
-                        self.send_header('Content-type', 'text/html')
-                        self.end_headers()
-                        
-                        self.wfile.write('<html>')
-                        self.wfile.write('  <head>')
-                        self.wfile.write('    <title>%s</title>' % (dirpath))
-                        self.wfile.write('  </head>')
-                        self.wfile.write('  <body>')
-                        self.wfile.write('    <a href="%s">Home</a><br>' % ('/'));
- 
-                        # Make the directory path navigable.
-                        dirstr = ''
-                        href = None
-                        for seg in rpath.split('/'):
-                            if href is None:
-                                href = seg
-                            else:
-                                href = href + '/' + seg
-                                dirstr += '/'
-                            dirstr += '<a href="%s">%s</a>' % (href, seg)
-                        self.wfile.write('    <p>Directory: %s</p>' % (dirstr))
- 
-                        # Write out the simple directory list (name and size).
-                        self.wfile.write('    <table border="0">')
-                        self.wfile.write('      <tbody>')
-                        fnames = ['..']
-                        fnames.extend(sorted(os.listdir(dirpath), key=str.lower))
-                        for fname in fnames:
-                            self.wfile.write('        <tr>')
-                            self.wfile.write('          <td align="left">')
-                            path = rpath + '/' + fname
-                            fpath = os.path.join(dirpath, fname)
-                            if os.path.isdir(path):
-                                self.wfile.write('            <a href="%s">%s/</a>' % (path, fname))
-                            else:
-                                self.wfile.write('            <a href="%s">%s</a>' % (path, fname))
-                            self.wfile.write('          <td>  </td>')
-                            self.wfile.write('          </td>')
-                            self.wfile.write('          <td align="right">%d</td>' % (os.path.getsize(fpath)))
-                            self.wfile.write('        </tr>')
-                        self.wfile.write('      </tbody>')
-                        self.wfile.write('    </table>')
-                        self.wfile.write('  </body>')
-                        self.wfile.write('</html>')
+          
+            self.send_response(200)  # OK
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.info()
+    
 
 
         def do_POST(self):
@@ -287,7 +170,7 @@ def make_request_handler_class(opts):
             Handle POST requests.
             '''
 
-            global table
+            global last_db_update
             
             logging.debug('POST %s' % (self.path))
 
@@ -312,7 +195,8 @@ def make_request_handler_class(opts):
                     i += 1
 
             GardenLabDB.insert_data_from_dict( postvars )
-
+            logging.debug("Inserted values in Database")
+            last_db_update = datetime.datetime.now()
 
             # Tell the browser everything is okay and that there is
             # HTML to display.

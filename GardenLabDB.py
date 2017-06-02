@@ -130,6 +130,7 @@ def test_data():
     cnx.close()
 
 
+
 def list_last_record():
     """
     List the last record added to the DB
@@ -140,7 +141,7 @@ def list_last_record():
     
     cursor = cnx.cursor()
 
-    query = ("SELECT ts, temperature FROM GardenLabData ORDER BY 'id' DESC LIMIT 1")
+    query = ("SELECT ts, temperature FROM GardenLabData ORDER BY id DESC LIMIT 1")
     cursor.execute(query)
     for( ts, temperature) in cursor:
         print ts, temperature
@@ -156,23 +157,40 @@ def insert_data_from_dict( post_args ):
     temp = float(post_args[TEMPERATURE_KEY][0])
     humi = float(post_args[HUMIDITY_KEY][0])
     itmp = float(post_args[INTERNAL_TEMP_KEY][0])
-    pres = float(post_args[PRESSURE_KEY][0])
+    pres = float(post_args[PRESSURE_KEY][0])/100.0;  # Convert to HPa
     lcur = float(post_args[LOAD_CURRENT_KEY][0])
     batv = float(post_args[BATTERY_VOLTAGE_KEY][0])
     wspeed = float(post_args[WIND_SPEED_KEY][0])
-    wdir = float(post_args[WIND_DIR_KEY][0])
-    rain = float(post_args[RAIN_FALL_KEY][0])
+    wdir = float(post_args[WIND_DIRECTION_KEY][0])
+    rain = float(post_args[RAINFALL_KEY][0])
 
     cnx = mysql.connector.connect(user=USER_NAME, password=PASSWD,
                                  database=DATABASE_NAME )
     
     cursor = cnx.cursor()
-    cursor.execute(INSERT_DEF,(temp,humi,itmp,pres,lcur,batv,wspeed,wdir,rain))
+    cursor.execute(INSERT_DEF,(time.strftime("%Y-%m-%d"),temp,humi,itmp,pres,lcur,batv,wspeed,wdir,rain))
     cnx.commit()
     cursor.close()
     cnx.close()
 
-   
+def count_records():
+    """
+    Return the number of records
+    """
+    cnx = mysql.connector.connect(user=USER_NAME, password=PASSWD,
+                                 database=DATABASE_NAME )
+    
+    cursor = cnx.cursor()
+
+    query = ("SELECT COUNT(*) FROM GardenLabData")
+    cursor.execute(query)
+    for(cnt) in cursor:
+        count = cnt
+    
+    cursor.close()
+    cnx.close()
+
+    return count
     
 
 def main():
