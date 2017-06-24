@@ -45,6 +45,7 @@ import sys
 import datetime
 
 import GardenLabDB
+import GardenLabPlot
 
 last_db_update = datetime.datetime.now()
 
@@ -197,6 +198,8 @@ def make_request_handler_class(opts):
             GardenLabDB.insert_data_from_dict( postvars )
             logging.debug("Inserted values in Database")
             last_db_update = datetime.datetime.now()
+
+            GardenLabPlot.generate_all_latest_plots()
 
             # Tell the browser everything is okay and that there is
             # HTML to display.

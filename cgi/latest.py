@@ -30,16 +30,18 @@ cursor = cnx.cursor()
 
 # Get the latest record in the database:
 
-query = ("SELECT id, ts, temperature, humidity, pressure FROM GardenLabData"
+query = ("SELECT id, ts, temperature, humidity, pressure, battery_voltage, load_current, wind_speed  FROM GardenLabData"
          " ORDER BY id DESC LIMIT 1")
 cursor.execute(query)
 
-for( id, ts, tmp,h,p ) in cursor:
+for( id, ts, tmp,h,p, v, lc, ws ) in cursor:
     timestamp=ts.strftime("%H:%M:%S  %d %B %Y")
     temperature = tmp
     humidity=h
     pressure=p
-    
+    battery_voltage = v
+    load_current = lc
+    wind_speed = ws
     
 cursor.close()
 cnx.close()
@@ -48,4 +50,6 @@ cnx.close()
 template = env.get_template('latest.html')
 
 print template.render(time_stamp=timestamp,temperature=temperature,
-                      humidity=humidity, pressure=int(pressure))
+                      humidity=humidity, pressure=int(pressure), 
+      battery_voltage=battery_voltage, wind_speed = wind_speed, 
+	load_current=load_current)

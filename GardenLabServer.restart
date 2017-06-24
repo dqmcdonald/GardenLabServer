@@ -1,0 +1,7 @@
+#!/bin/bash
+#
+# Start the webserver.
+#
+./GardenLabServer.stop
+./GardenLabServer.start
+echo "restarted"
