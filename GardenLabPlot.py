@@ -22,7 +22,7 @@ field_colors = {
     "pressure" : "#0505d0",
     "battery_voltage" : "#d0d005",
     "wind_speed" : "#d0d0d0" ,
-    "load_current" : "#00f000" }
+    "panel_current" : "#00f000" }
 
 
 
