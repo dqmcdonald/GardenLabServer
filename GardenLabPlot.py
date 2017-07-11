@@ -15,6 +15,7 @@ from matplotlib.dates import HourLocator, DateFormatter
 import GardenLabDB
 from enum import Enum
 import datetime
+import math
 
 class PlotType(Enum):
     LINE = 1
@@ -97,14 +98,15 @@ def generate_24hr_plot(field, color='green', plot_type=PlotType.LINE):
     elif plot_type == PlotType.POLAR_PLOT:
         ax.set_theta_zero_location('N')
         ax.set_theta_direction(-1)
-        # Only plot every 3rd value for a less crowded plot
-        field_data = field_data[0::3]
-        dates = dates[0::3]
-        speed_data = speed_data[0::3]
+        # Only plot every 4th value for a less crowded plot
+        fd = field_data[0::4]
+        d = dates[0::4]
+        speed_data = speed_data[0::4]
+        fd1= [ math.radians(x) for x in fd]
         ax.set_rlabel_position(0.0)
-        radial = [x for x in range(0,len(dates))]
-        ax.scatter(field_data, radial, c=speed_data, cmap="Oranges")
-        ax.set_ylim(top=len(dates))
+        radial = [x for x in range(0,len(d))]
+        ax.scatter(fd1, radial, c=speed_data, cmap="Oranges", vmax=10.0)
+        ax.set_ylim(top=len(d))
     
         
         
