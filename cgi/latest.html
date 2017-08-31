@@ -19,22 +19,257 @@
 <br>
 <table style="float:center;width:25%;">
 
-<tr><td> Temperature </td> <td> {{ temperature }} </td> <td>
+<tr><td> Temperature </td> <td> {{ temperature }} </td> 
+<td> <table>
+<tr> <td> </td> <td> Minimum </td> <td> Maximum </td>  <td> Average </td> </tr>
+<tr> 
+	<td align="left" > Day: </td> 
+	<td align="right"> {{day_min_temperature}} </td> 
+	<td align="right"> {{day_max_temperature}} </td> 
+	<td align="right"> {{day_avg_temperature}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Week: </td> 
+	<td align="right"> {{week_min_temperature}} </td> 
+	<td align="right"> {{week_max_temperature}} </td> 
+	<td align="right"> {{week_avg_temperature}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Month: </td> 
+	<td align="right"> {{month_min_temperature}} </td> 
+	<td align="right"> {{month_max_temperature}} </td> 
+	<td align="right"> {{month_avg_temperature}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Year: 
+	<td align="right"> {{year_min_temperature}} </td> 
+	<td align="right"> {{year_max_temperature}} </td> 
+	<td align="right"> {{year_avg_temperature}} <td> 
+</tr>
+</table>
+</td>
+
+<td align="left">
  <img src=images/latest_temperature.png></td></tr>
-<tr><td> Humidity </td> <td> {{ humidity }} </td> <td>
+
+
+<tr>
+<td> Humidity </td> <td> {{ humidity }} </td> 
+
+<td> <table>
+<tr> <td> </td> <td> Minimum </td> <td> Maximum </td>  <td> Average </td> </tr>
+<tr> 
+	<td align="left" > Day: </td> 
+	<td align="right"> {{day_min_humidity}} </td> 
+	<td align="right"> {{day_max_humidity}} </td> 
+	<td align="right"> {{day_avg_humidity}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Week: </td> 
+	<td align="right"> {{week_min_humidity}} </td> 
+	<td align="right"> {{week_max_humidity}} </td> 
+	<td align="right"> {{week_avg_humidity}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Month: </td> 
+	<td align="right"> {{month_min_humidity}} </td> 
+	<td align="right"> {{month_max_humidity}} </td> 
+	<td align="right"> {{month_avg_humidity}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Year: 
+	<td align="right"> {{year_min_humidity}} </td> 
+	<td align="right"> {{year_max_humidity}} </td> 
+	<td align="right"> {{year_avg_humidity}} <td> 
+</tr>
+</table>
+</td>
+
+
+<td>
  <img src=images/latest_humidity.png ></td></tr>
-<tr><td> Pressure</td> <td> {{ pressure }} </td> <td>
- <img src=images/latest_pressure.png ><td></tr>
-<tr><td> Wind Speed</td> <td> {{ wind_speed }} </td> <td>
- <img src=images/latest_wind_speed.png ><td></tr>
-<tr><td> Wind Direction</td> <td> {{ wind_direction }} </td> <td>
- <img src=images/latest_wind_direction.png ><td></tr>
-<tr><td> Rainfall</td> <td> {{ rainfall }} </td> <td>
- <img src=images/latest_rainfall.png ><td></tr>
-<tr><td> Battery Voltage</td> <td> {{ battery_voltage }} </td> <td>
- <img src=images/latest_battery_voltage.png ><td></tr>
-<tr><td> Panel Current</td> <td> {{ panel_current }} </td> <td>
- <img src=images/latest_panel_current.png ><td></tr>
+
+
+
+<tr><td> Pressure</td> <td> {{ pressure }} </td> 
+
+<td> <table>
+<tr> <td> </td> <td> Minimum </td> <td> Maximum </td>  <td> Average </td> </tr>
+<tr> 
+	<td align="left" > Day: </td> 
+	<td align="right"> {{day_min_pressure}} </td> 
+	<td align="right"> {{day_max_pressure}} </td> 
+	<td align="right"> {{day_avg_pressure}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Week: </td> 
+	<td align="right"> {{week_min_pressure}} </td> 
+	<td align="right"> {{week_max_pressure}} </td> 
+	<td align="right"> {{week_avg_pressure}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Month: </td> 
+	<td align="right"> {{month_min_pressure}} </td> 
+	<td align="right"> {{month_max_pressure}} </td> 
+	<td align="right"> {{month_avg_pressure}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Year: 
+	<td align="right"> {{year_min_pressure}} </td> 
+	<td align="right"> {{year_max_pressure}} </td> 
+	<td align="right"> {{year_avg_pressure}} <td> 
+</tr>
+</table>
+</td>
+
+
+<td>
+ <img src=images/latest_pressure.png ><td>
+</tr> 
+<tr><td> Wind Speed</td> <td> {{ wind_speed }} </td> 
+<td> <table>
+<tr> <td> </td> <td> Minimum </td> <td> Maximum </td>  <td> Average </td> </tr>
+<tr> 
+	<td align="left" > Day: </td> 
+	<td align="right"> {{day_min_wind_speed}} </td> 
+	<td align="right"> {{day_max_wind_speed}} </td> 
+	<td align="right"> {{day_avg_wind_speed}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Week: </td> 
+	<td align="right"> {{week_min_wind_speed}} </td> 
+	<td align="right"> {{week_max_wind_speed}} </td> 
+	<td align="right"> {{week_avg_wind_speed}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Month: </td> 
+	<td align="right"> {{month_min_wind_speed}} </td> 
+	<td align="right"> {{month_max_wind_speed}} </td> 
+	<td align="right"> {{month_avg_wind_speed}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Year: 
+	<td align="right"> {{year_min_wind_speed}} </td> 
+	<td align="right"> {{year_max_wind_speed}} </td> 
+	<td align="right"> {{year_avg_wind_speed}} <td> 
+</tr>
+</table>
+</td>
+
+<td> <img src=images/latest_wind_speed.png ><td></tr>
+
+
+<tr>
+<td> Wind Direction</td> <td> {{ wind_direction }} </td> 
+
+<td>
+ <img src=images/latest_wind_direction.png ><td>
+</tr>
+
+
+<tr>
+<td> Rainfall</td> <td> {{ rainfall }} </td> 
+<td> <table>
+<tr> <td> </td> <td> Minimum </td> <td> Maximum </td>  <td> Average </td> </tr>
+<tr> 
+	<td align="left" > Day: </td> 
+	<td align="right"> {{day_min_rainfall}} </td> 
+	<td align="right"> {{day_max_rainfall}} </td> 
+	<td align="right"> {{day_avg_rainfall}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Week: </td> 
+	<td align="right"> {{week_min_rainfall}} </td> 
+	<td align="right"> {{week_max_rainfall}} </td> 
+	<td align="right"> {{week_avg_rainfall}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Month: </td> 
+	<td align="right"> {{month_min_rainfall}} </td> 
+	<td align="right"> {{month_max_rainfall}} </td> 
+	<td align="right"> {{month_avg_rainfall}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Year: 
+	<td align="right"> {{year_min_rainfall}} </td> 
+	<td align="right"> {{year_max_rainfall}} </td> 
+	<td align="right"> {{year_avg_rainfall}} <td> 
+</tr>
+</table>
+</td>
+
+<td> <img src=images/latest_rainfall.png ><td>
+</tr>
+
+
+<tr>
+<td> Battery Voltage</td> <td> {{ battery_voltage }} </td> 
+<td> <table>
+<tr> <td> </td> <td> Minimum </td> <td> Maximum </td>  <td> Average </td> </tr>
+<tr> 
+	<td align="left" > Day: </td> 
+	<td align="right"> {{day_min_battery_voltage}} </td> 
+	<td align="right"> {{day_max_battery_voltage}} </td> 
+	<td align="right"> {{day_avg_battery_voltage}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Week: </td> 
+	<td align="right"> {{week_min_battery_voltage}} </td> 
+	<td align="right"> {{week_max_battery_voltage}} </td> 
+	<td align="right"> {{week_avg_battery_voltage}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Month: </td> 
+	<td align="right"> {{month_min_battery_voltage}} </td> 
+	<td align="right"> {{month_max_battery_voltage}} </td> 
+	<td align="right"> {{month_avg_battery_voltage}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Year: 
+	<td align="right"> {{year_min_battery_voltage}} </td> 
+	<td align="right"> {{year_max_battery_voltage}} </td> 
+	<td align="right"> {{year_avg_battery_voltage}} <td> 
+</tr>
+</table>
+</td>
+
+<td> <img src=images/latest_battery_voltage.png ><td>
+</tr>
+
+<tr>
+<td> Panel Current</td> <td> {{ panel_current }} </td> 
+
+<td> <table>
+<tr> <td> </td> <td> Minimum </td> <td> Maximum </td>  <td> Average </td> </tr>
+<tr> 
+	<td align="left" > Day: </td> 
+	<td align="right"> {{day_min_panel_current}} </td> 
+	<td align="right"> {{day_max_panel_current}} </td> 
+	<td align="right"> {{day_avg_panel_current}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Week: </td> 
+	<td align="right"> {{week_min_panel_current}} </td> 
+	<td align="right"> {{week_max_panel_current}} </td> 
+	<td align="right"> {{week_avg_panel_current}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Month: </td> 
+	<td align="right"> {{month_min_panel_current}} </td> 
+	<td align="right"> {{month_max_panel_current}} </td> 
+	<td align="right"> {{month_avg_panel_current}} <td> 
+</tr>
+<tr> 
+	<td align="left"> Year: 
+	<td align="right"> {{year_min_panel_current}} </td> 
+	<td align="right"> {{year_max_panel_current}} </td> 
+	<td align="right"> {{year_avg_panel_current}} <td> 
+</tr>
+</table>
+</td>
+
+<td> <img src=images/latest_panel_current.png ><td>
+</tr>
 
 </table>
 
