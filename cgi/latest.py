@@ -106,6 +106,9 @@ query_db(cnx, max_24_query, context_dict, "day_max_")
 avg_24_query = build_query( fields, TABLE_NAME, DAY_COND, "AVG")
 query_db(cnx, avg_24_query, context_dict, "day_avg_")
 
+sum_24_query = build_query( fields, TABLE_NAME, DAY_COND, "SUM")
+query_db(cnx, sum_24_query, context_dict, "day_sum_")
+
 
 min_week_query = build_query( fields, TABLE_NAME, WEEK_COND, "MIN")
 query_db(cnx, min_week_query, context_dict, "week_min_")
@@ -116,6 +119,9 @@ query_db(cnx, max_week_query, context_dict, "week_max_")
 avg_week_query = build_query( fields, TABLE_NAME, WEEK_COND, "AVG")
 query_db(cnx, avg_week_query, context_dict, "week_avg_")
 
+sum_week_query = build_query( fields, TABLE_NAME, WEEK_COND, "SUM")
+query_db(cnx, sum_week_query, context_dict, "week_sum_")
+
 min_month_query = build_query( fields, TABLE_NAME, MONTH_COND, "MIN")
 query_db(cnx, min_month_query, context_dict, "month_min_")
 
@@ -124,6 +130,9 @@ query_db(cnx, max_month_query, context_dict, "month_max_")
 
 avg_month_query = build_query( fields, TABLE_NAME, MONTH_COND, "AVG")
 query_db(cnx, avg_month_query, context_dict, "month_avg_")
+
+sum_month_query = build_query( fields, TABLE_NAME, MONTH_COND, "SUM")
+query_db(cnx, sum_month_query, context_dict, "month_sum_")
 
 
 min_year_query = build_query( fields, TABLE_NAME, YEAR_COND, "MIN")
@@ -134,6 +143,11 @@ query_db(cnx, max_year_query, context_dict, "year_max_")
 
 avg_year_query = build_query( fields, TABLE_NAME, YEAR_COND, "AVG")
 query_db(cnx, avg_year_query, context_dict, "year_avg_")
+
+sum_year_query = build_query( fields, TABLE_NAME, YEAR_COND, "SUM")
+query_db(cnx, sum_year_query, context_dict, "year_sum_")
+
+
 cnx.close()
 
 
