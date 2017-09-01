@@ -74,6 +74,12 @@ WEEK_COND = " where ts > DATE_SUB( NOW(), INTERVAL 1 WEEK )"
 MONTH_COND = " where ts > DATE_SUB( NOW(), INTERVAL 1 MONTH )"
 YEAR_COND = " where ts > DATE_SUB( NOW(), INTERVAL 1 YEAR )"
 
+PERIODS = [("day",DAY_COND),("week",WEEK_COND),("month",MONTH_COND),
+           ("year",YEAR_COND)]
+FUNCS = [("min","MIN"), ("max","MAX"), ("avg","AVG"), ("sum","SUM" )]
+
+
+
 
 context_dict = {}
 
@@ -97,64 +103,13 @@ query_db(cnx, latest_query, context_dict)
 
 # Get the min, max and average for the last 24 hours:
 
-min_24_query = build_query( fields, TABLE_NAME, DAY_COND, "MIN")
-query_db(cnx, min_24_query, context_dict, "day_min_")
-
-max_24_query = build_query( fields, TABLE_NAME, DAY_COND, "MAX")
-query_db(cnx, max_24_query, context_dict, "day_max_")
-
-avg_24_query = build_query( fields, TABLE_NAME, DAY_COND, "AVG")
-query_db(cnx, avg_24_query, context_dict, "day_avg_")
-
-sum_24_query = build_query( fields, TABLE_NAME, DAY_COND, "SUM")
-query_db(cnx, sum_24_query, context_dict, "day_sum_")
-
-
-min_week_query = build_query( fields, TABLE_NAME, WEEK_COND, "MIN")
-query_db(cnx, min_week_query, context_dict, "week_min_")
-
-max_week_query = build_query( fields, TABLE_NAME, WEEK_COND, "MAX")
-query_db(cnx, max_week_query, context_dict, "week_max_")
-
-avg_week_query = build_query( fields, TABLE_NAME, WEEK_COND, "AVG")
-query_db(cnx, avg_week_query, context_dict, "week_avg_")
-
-sum_week_query = build_query( fields, TABLE_NAME, WEEK_COND, "SUM")
-query_db(cnx, sum_week_query, context_dict, "week_sum_")
-
-min_month_query = build_query( fields, TABLE_NAME, MONTH_COND, "MIN")
-query_db(cnx, min_month_query, context_dict, "month_min_")
-
-max_month_query = build_query( fields, TABLE_NAME, MONTH_COND, "MAX")
-query_db(cnx, max_month_query, context_dict, "month_max_")
-
-avg_month_query = build_query( fields, TABLE_NAME, MONTH_COND, "AVG")
-query_db(cnx, avg_month_query, context_dict, "month_avg_")
-
-sum_month_query = build_query( fields, TABLE_NAME, MONTH_COND, "SUM")
-query_db(cnx, sum_month_query, context_dict, "month_sum_")
-
-
-min_year_query = build_query( fields, TABLE_NAME, YEAR_COND, "MIN")
-query_db(cnx, min_year_query, context_dict, "year_min_")
-
-max_year_query = build_query( fields, TABLE_NAME, YEAR_COND, "MAX")
-query_db(cnx, max_year_query, context_dict, "year_max_")
-
-avg_year_query = build_query( fields, TABLE_NAME, YEAR_COND, "AVG")
-query_db(cnx, avg_year_query, context_dict, "year_avg_")
-
-sum_year_query = build_query( fields, TABLE_NAME, YEAR_COND, "SUM")
-query_db(cnx, sum_year_query, context_dict, "year_sum_")
+for (plab,period) in PERIODS:
+    for ( flab, func) in FUNCS:
+        query = build_query(fields, TABLE_NAME, period,func)
+        query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
 
 
 cnx.close()
-
-
-
-
-
-
 
 
 
