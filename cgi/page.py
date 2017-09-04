@@ -22,8 +22,7 @@ class Page(object):
         """
         Return a printable represnetation of the page and all the contents
         """
-        page = """
-           Content-type: text/html\n
+        page = """Content-type: text/html\n
             <html>
             <head>
             <meta charset="utf-8">
