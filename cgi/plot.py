@@ -3,6 +3,7 @@ import os,sys
 import cgi
 import cgitb; cgitb.enable()
 
+from __future__ import print_function
 
 from table import Table
 from page import Page

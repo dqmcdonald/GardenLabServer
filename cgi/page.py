@@ -8,6 +8,8 @@ Page - Sets up an HTML page
 @author: que
 """
 
+from __future__ import print_function
+
 class Page(object):
     """
     Defines an HTML page
