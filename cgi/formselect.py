@@ -18,10 +18,11 @@ class FormSelect:
     Select element of HTML form
     """
     
-    def __init__(self, name, items, current_item=None):
+    def __init__(self, name, items, current_item=None, label=None):
         self.name = name
         self.items = [x for x in items]
         self.current_item = current_item
+        self.label = label
         
     
     def setCurrentItem(self, current_item):
@@ -31,7 +32,10 @@ class FormSelect:
         
     
     def __repr__(self):
-        sel = '<select name="%s">\n' % (self.name)
+        sel= ""
+        if self.label is not None:
+            sel += '<label for="%s">%s</label>\n' % (self.name,self.label)
+        sel += '<select name="%s">\n' % (self.name)
         for i in self.items:
             if i == self.current_item:
                 selected = "selected"
@@ -71,4 +75,14 @@ if __name__ == "__main__":
         print("Correctly caught bad current item")
     else:
         print("***Failed to catch setting bad current item")
+        
+    s2= FormSelect( "cars", ['volvo','saab','fiat','audi'], 'audi',"Choose a car")  
+    assert(str(s2) == """<label for="cars">Choose a car</label>
+<select name="cars">
+<option value="volvo" >volvo</option>
+<option value="saab" >saab</option>
+<option value="fiat" >fiat</option>
+<option value="audi" selected>audi</option>
+</select>
+""")
         
