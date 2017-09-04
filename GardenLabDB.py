@@ -173,7 +173,7 @@ def insert_data_from_dict( post_args ):
     wspeed = float(post_args[WIND_SPEED_KEY][0])
     wdir = float(post_args[WIND_DIRECTION_KEY][0])
     rain = float(post_args[RAINFALL_KEY][0])
-    if rain > 30.0:  # More than 30mm in 5min is spurious (shaking etc)
+    if rain > 2.0:  # More than 2mm in 5min is spurious (shaking etc)
        rain = 0.0
     try:
     	pcur = float(post_args[PANEL_CURRENT_KEY][0])
