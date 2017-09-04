@@ -1,20 +1,33 @@
 #!/usr/bin/env python
+from __future__ import print_function
+
 import os,sys
 import cgi
 import cgitb; cgitb.enable()
 
-from __future__ import print_function
+fields = [ "temperature", "humidity", "pressure", "battery_voltage",
+          "panel_current", "load_current", "wind_speed", "rainfall", "wind_direction"]
+
 
 from table import Table
 from page import Page
+from form import Form
+from formselect import FormSelect
 
-t = Table(2,3)
-t.setCell(0,1, "<H3>Table</H3>")
 
 p = Page("GardenLab Plotting")
-p.addContent(t)
 
-print p
+f = Form("/cgi/plot.py","POST")
+fs = FormSelect("field",fields,"temperature")
+
+f.addContent(fs)
+
+
+p.addContent(f)
+
+
+
+print(p)
 
 
 

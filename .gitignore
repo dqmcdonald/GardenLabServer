@@ -8,3 +8,5 @@ fonts
 originals
 private.data
 cgi/images
+
+cgi/select.py
