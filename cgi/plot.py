@@ -17,7 +17,7 @@ from formselect import FormSelect
 
 p = Page("GardenLab Plotting")
 
-f = Form("/cgi/plot.py","POST")
+f = Form("/cgi/plot.py","POST","Generate Plot")
 fs = FormSelect("field",fields,"temperature", "Data to plot:")
 
 f.addContent(fs)
