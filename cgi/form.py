@@ -15,17 +15,21 @@ class Form(object):
     HTML form object - basically a container for other objects with a form
     """
     
-    def __init__(self, action, method):
+    def __init__(self, action, method, submit_text =None):
         self.contents = []
         self.action = action
         self.method = method
+        self.submit_text = submit_text
         pass
     
     def __repr__(self):
         form = "<FORM action=%s method=%s >\n" % (self.action, self.method)
         for c in self.contents:
             form += str(c)
-            
+            form += '\n'
+        
+        if self.submit_text is not None:
+            form += '<input type="submit" value="%s">\n' % self.submit_text
         form += "\n</FORM>\n"
         return form
         
@@ -37,12 +41,14 @@ class Form(object):
     
 if __name__=="__main__":
 
-    f = Form("/cgi/plot.py", "post")  
+    f = Form("/cgi/plot.py", "post","Plot")  
     
     f.addContent('<input type="radio" name="color" value="Green"> Green<br>')
-   
+
     assert(str(f)== """<FORM action=/cgi/plot.py method=post >
 <input type="radio" name="color" value="Green"> Green<br>
+<input type="submit" value="Plot">
+
 </FORM>
 """)
     
