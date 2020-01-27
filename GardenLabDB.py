@@ -12,7 +12,7 @@ DATABASE_NAME="GardenLab"
 TABLE_NAME="GardenLabData"
 
 # Read the password and username from an external file:
-pd= open("private.data").read().strip()
+pd= open("/home/pi/GardenLabServer/private.data").read().strip()
 pd = pd.split(" ")
 USER_NAME=pd[0]
 PASSWD=pd[1]
@@ -97,13 +97,13 @@ def create_table():
     cnx = open_database()
     
     cursor = cnx.cursor()
-    print "Deleting table"
+    print("Deleting table")
     try:
         cursor.execute("DROP TABLE `{0}`".format(TABLE_NAME))
     except:
         pass
-    print "Creating data with SQL expression"
-    print DATA_TABLE_DEF[TABLE_NAME]
+    print("Creating data with SQL expression")
+    print(DATA_TABLE_DEF[TABLE_NAME])
     cursor.execute(DATA_TABLE_DEF[TABLE_NAME])
     cnx.close()
 
@@ -128,14 +128,14 @@ def test_data():
     
     cursor = cnx.cursor()
     data = (time.strftime("%Y-%m-%d"), temp,humi,itmp,pres,lcur,batv,wspeed,wdir,rain,pcur)
-    print data
+    print(data)
     cursor.execute(INSERT_DEF, data)
     cnx.commit()
 
     query = ("SELECT ts, temperature FROM GardenLabData")
     cursor.execute(query)
     for( ts, temperature) in cursor:
-        print ts, temperature
+        print( ts, temperature)
     
     cursor.close()
     cnx.close()
@@ -154,7 +154,7 @@ def list_last_record():
     query = ("SELECT ts, temperature FROM GardenLabData ORDER BY id DESC LIMIT 1")
     cursor.execute(query)
     for( ts, temperature) in cursor:
-        print ts, temperature
+        print( ts, temperature)
     
     cursor.close()
     cnx.close()
@@ -176,9 +176,9 @@ def insert_data_from_dict( post_args ):
     if rain > 2.0:  # More than 2mm in 5min is spurious (shaking etc)
        rain = 0.0
     try:
-    	pcur = float(post_args[PANEL_CURRENT_KEY][0])
+       pcur = float(post_args[PANEL_CURRENT_KEY][0])
     except:
-	pcur = 0.0
+       pcur = 0.0
 
     cnx = mysql.connector.connect(user=USER_NAME, password=PASSWD,
                                  database=DATABASE_NAME )

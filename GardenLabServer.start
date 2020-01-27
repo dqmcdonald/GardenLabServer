@@ -2,7 +2,7 @@
 #
 # Start the webserver.
 #
-WsBase=~/GardenLab/logs/webserver-0.0.0.0-8080
+WsBase=~/GardenLabServer/logs/webserver-0.0.0.0-8080
 PidFile=$WsBase.pid
 if [ -f $PidFile ] ; then
     Pid=$(cat $PidFile)
@@ -14,5 +14,5 @@ if [ -f $PidFile ] ; then
 	rm -f $PidFile
     fi
 fi
-./GardenLabServer.py -H 0.0.0.0 -p 8080 -l debug --no-dirlist -r ~/GardenLab -d ~/GardenLab/logs
+/home/pi/GardenLabServer/GardenLabServer.py -H 0.0.0.0 -p 8080 -l debug --no-dirlist -r ~/GardenLabServer -d ~/GardenLabServer/logs
 echo "started"

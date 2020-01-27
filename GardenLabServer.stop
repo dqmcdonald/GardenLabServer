@@ -2,7 +2,7 @@
 #
 # Stop the webserver.
 #
-WsBase=~/GardenLab/logs/webserver-0.0.0.0-8080
+WsBase=~/GardenLabServer/logs/webserver-0.0.0.0-8080
 PidFile=$WsBase.pid
 if [ -f $PidFile ] ; then
     Pid=$(cat $PidFile)

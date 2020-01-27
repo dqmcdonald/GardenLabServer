@@ -2,6 +2,6 @@
 #
 # Start the webserver.
 #
-./GardenLabServer.stop
-./GardenLabServer.start
+/home/pi/GardenLabServer/GardenLabServer.stop
+/home/pi/GardenLabServer/GardenLabServer.start
 echo "restarted"

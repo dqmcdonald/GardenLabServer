@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3.7
 # -*- coding: utf-8 -*-
 
 # GardenLab Database and Webserver Script
@@ -37,7 +37,9 @@
 VERSION = '1.2'
 
 import argparse
-import BaseHTTPServer
+#import BaseHTTPServer
+import http.server
+import urllib.parse
 import cgi
 import logging
 import os
@@ -58,7 +60,7 @@ def make_request_handler_class(opts):
     It exists to allow the handler to access the opts.path variable
     locally.
     '''
-    class MyRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+    class MyRequestHandler(http.server.BaseHTTPRequestHandler):
         '''
         Factory generated request handler class that contain
         additional class variables.
@@ -81,52 +83,58 @@ def make_request_handler_class(opts):
 
             http://127.0.0.1:8080/info
             '''
-            self.wfile.write('<html>')
-            self.wfile.write('  <head>')
-            self.wfile.write('    <title>GardenLab Server Info</title>')
-            self.wfile.write('  </head>')
-            self.wfile.write('  <body>')
-            self.wfile.write('    <table>')
-            self.wfile.write('      <tbody>')
-            self.wfile.write('        <tr>')
-            self.wfile.write('          <td>Client_address:</td>')
-            self.wfile.write('          <td>%r</td>' % (repr(self.client_address)))
-            self.wfile.write('        </tr>')
-            self.wfile.write('        <tr>')
-            self.wfile.write('          <td>Command:</td>')
-            self.wfile.write('          <td>%r</td>' % (repr(self.command)))
-            self.wfile.write('        </tr>')
-            self.wfile.write('        <tr>')
-            self.wfile.write('          <td>Headers</td>')
-            self.wfile.write('          <td>%r</td>' % (repr(self.headers)))
-            self.wfile.write('        </tr>')
-            self.wfile.write('        <tr>')
-            self.wfile.write('          <td>Path</td>')
-            self.wfile.write('          <td>%r</td>' % (repr(self.path)))
-            self.wfile.write('        </tr>')
-            self.wfile.write('        <tr>')
-            self.wfile.write('          <td>Server_version</td>')
-            self.wfile.write('          <td>%r</td>' % (repr(self.server_version)))
-            self.wfile.write('        </tr>')
-            self.wfile.write('        <tr>')
-            self.wfile.write('          <td>Sys_version</td>')
-            self.wfile.write('          <td>%r</td>' % (repr(self.sys_version)))
-            self.wfile.write('        </tr>')
-            self.wfile.write('        <tr>')
-            self.wfile.write('          <td>Database records:</td>')
-            self.wfile.write('          <td>%d</td>' % (
-                GardenLabDB.count_records()))
-            self.wfile.write('        </tr>')
-            self.wfile.write('        </tr>')
-            self.wfile.write('        <tr>')
-            self.wfile.write('          <td>Last add:</td>')
-            self.wfile.write('          <td>%s</td>' % (
-                str(last_db_update)))
-            self.wfile.write('        </tr>')
-            self.wfile.write('      </tbody>')
-            self.wfile.write('    </table>')
-            self.wfile.write('  </body>')
-            self.wfile.write('</html>')
+            self.wfile.write('<html>'.encode())
+            self.wfile.write('  <head>'.encode())
+            self.wfile.write('    <title>GardenLab Server Info</title>'.encode())
+            self.wfile.write('  </head>'.encode())
+            self.wfile.write('  <body>'.encode())
+            self.wfile.write('    <table>'.encode())
+            self.wfile.write('      <tbody>'.encode())
+            self.wfile.write('        <tr>'.encode())
+            self.wfile.write('          <td>Client_address:</td>'.encode())
+            line =  '         <td>%r</td>'% (repr(self.client_address))
+            self.wfile.write(line.encode())
+            self.wfile.write('        </tr>'.encode())
+            self.wfile.write('        <tr>'.encode())
+            self.wfile.write('          <td>Command:</td>'.encode())
+            line = '          <td>%r</td>'% (repr(self.command))
+            self.wfile.write(line.encode())
+            self.wfile.write('        </tr>'.encode())
+            self.wfile.write('        <tr>'.encode())
+            self.wfile.write('          <td>Headers</td>'.encode())
+            line = '      <td>%r</td>'% (repr(self.headers))
+            self.wfile.write(line.encode())
+            self.wfile.write('        </tr>'.encode())
+            self.wfile.write('        <tr>'.encode())
+            self.wfile.write('          <td>Path</td>'.encode())
+            line = '          <td>%r</td>'% (repr(self.path))
+            self.wfile.write(line.encode())
+            self.wfile.write('        </tr>'.encode())
+            self.wfile.write('        <tr>'.encode())
+            self.wfile.write('          <td>Server_version</td>'.encode())
+            line = '          <td>%r</td>'% (repr(self.server_version))
+            self.wfile.write(line.encode())
+            self.wfile.write('        </tr>'.encode())
+            self.wfile.write('        <tr>'.encode())
+            self.wfile.write('          <td>Sys_version</td>'.encode())
+            line = '          <td>%r</td>'% (repr(self.sys_version))
+            self.wfile.write(line.encode())
+            self.wfile.write('        </tr>'.encode())
+            self.wfile.write('        <tr>'.encode())
+            self.wfile.write('          <td>Database records:</td>'.encode())
+            line =  '          <td>%d</td>' % ( GardenLabDB.count_records())
+            self.wfile.write(line.encode())
+            self.wfile.write('        </tr>'.encode())
+            self.wfile.write('        </tr>'.encode())
+            self.wfile.write('        <tr>'.encode())
+            self.wfile.write('          <td>Last add:</td>'.encode())
+            line = '          <td>%s</td>' % ( str(last_db_update))
+            self.wfile.write(line.encode())
+            self.wfile.write('        </tr>'.encode())
+            self.wfile.write('      </tbody>'.encode())
+            self.wfile.write('    </table>'.encode())
+            self.wfile.write('  </body>'.encode())
+            self.wfile.write('</html>'.encode())
 
         def do_GET(self):
             '''
@@ -181,7 +189,7 @@ def make_request_handler_class(opts):
                 postvars = cgi.parse_multipart(self.rfile, pdict)
             elif ctype == 'application/x-www-form-urlencoded':
                 length = int(self.headers['content-length'])
-                postvars = cgi.parse_qs(self.rfile.read(length), keep_blank_values=1)
+                postvars = urllib.parse.parse_qs(self.rfile.read(length), keep_blank_values=1)
             else:
                 postvars = {}
 
@@ -189,13 +197,17 @@ def make_request_handler_class(opts):
             logging.debug('TYPE %s' % (ctype))
             logging.debug('PATH %s' % (self.path))
             logging.debug('ARGS %d' % (len(postvars)))
+            # Convert the post vars to strings for subsequent processing:
+            postvars_str = {}
             if len(postvars):
                 i = 0
                 for key in sorted(postvars):
-                    logging.debug('ARG[%d] %s=%s' % (i, key, postvars[key]))
+                    postvars_str[key.decode('utf-8')] = postvars[key]
+                    logging.debug('ARG_str[%d] %s=%s' % (i, key.decode('utf-8'), 
+				postvars_str[key.decode('utf-8')]))
                     i += 1
 
-            GardenLabDB.insert_data_from_dict( postvars )
+            GardenLabDB.insert_data_from_dict( postvars_str )
             logging.debug("Inserted values in Database")
             last_db_update = datetime.datetime.now()
 
@@ -289,7 +301,7 @@ def httpd(opts):
     HTTP server
     '''
     RequestHandlerClass = make_request_handler_class(opts)
-    server = BaseHTTPServer.HTTPServer((opts.host, opts.port), RequestHandlerClass)
+    server = http.server.HTTPServer((opts.host, opts.port), RequestHandlerClass)
  
     logging.info('Server starting %s:%s (level=%s)' % (opts.host, opts.port, opts.level))
     try:
@@ -356,9 +368,9 @@ def daemonize(opts):
     sys.stdout.flush()
     sys.stderr.flush()
 
-    stdin = file('/dev/null', 'r')
-    stdout = file(outfile, 'a+')
-    stderr = file(errfile, 'a+', 0)
+    stdin = open('/dev/null', 'r')
+    stdout = open(outfile, 'a+')
+    stderr = open(errfile, 'a+')
 
     os.dup2(stdin.fileno(), sys.stdin.fileno())
     os.dup2(stdout.fileno(), sys.stdout.fileno())

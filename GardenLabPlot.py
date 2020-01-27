@@ -136,8 +136,8 @@ def generate_24hr_plot(field, color='green', plot_type=PlotType.LINE):
 
     plt.show
     
-    fig.savefig("images/latest_{0}.png".format(field), transparent=True,
-                    dpi=150)
+    fig.savefig("/home/pi/GardenLabServer/images/latest_{0}.png".format(
+	field), transparent=True, dpi=150)
 
     plt.close()
 

@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
+##!/usr/bin/env python3
 from jinja2 import Environment, FileSystemLoader
 import mysql.connector
 import datetime
@@ -58,13 +59,13 @@ def query_db( cnx, query, cd, prefix = "" ):
 
 
 env = Environment(
-   loader=FileSystemLoader('/home/pi/GardenLab/cgi')
+   loader=FileSystemLoader('/home/pi/GardenLabServer/cgi')
    ) 
 
 import cgitb
 
-print "Content-Type: text/html;charset=utf-8"
-print
+print( "Content-Type: text/html;charset=utf-8")
+print("")
 
 DATABASE_NAME="GardenLab"
 TABLE_NAME="GardenLabData"
@@ -85,7 +86,7 @@ context_dict = {}
 
 
 # Read the password and username from an external file:
-pd= open("private.data").read().strip()
+pd= open("/home/pi/GardenLabServer/private.data").read().strip()
 pd = pd.split(" ")
 USER_NAME=pd[0]
 PASSWD=pd[1]
@@ -116,4 +117,4 @@ cnx.close()
 template = env.get_template('latest.html')
 
 
-print template.render(context_dict)
+print( template.render(context_dict))
