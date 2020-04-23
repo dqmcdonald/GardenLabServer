@@ -8,5 +8,5 @@ fonts
 originals
 private.data
 cgi/images
-
+monthlyplots
 cgi/select.py

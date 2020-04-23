@@ -1,6 +1,10 @@
 #
 # Plot temperature,humidity,pressure for a specified month over all years
 #
+# Call as "python3 plotmonth.py <Month>"
+#
+# Plots are created in directory monthlyplots/
+#
 
 import sys
 import mysql.connector
