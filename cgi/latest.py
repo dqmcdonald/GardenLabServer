@@ -8,6 +8,9 @@ import datetime
 fields = ["id", "ts", "temperature", "humidity", "pressure", "battery_voltage",
           "panel_current", "wind_speed", "rainfall", "wind_direction"]
 
+vege_moisture_fields = ["moisture"]
+vege_temperature_fields = ["soil_temperature"]
+
 def build_query( fields, table, condition, func=None):
     """
     Builds and SQL query to retrieve fields from table with condition
@@ -53,9 +56,33 @@ def query_db( cnx, query, cd, prefix = "" ):
     cursor.close()
 
 
+def vege_moisture_query_db( cnx, query, cd, prefix = "" ):
+    """
+    Perform a query of the database and update dictionary "cd" with the
+    results for the vege garden moisture sensor
+    """
 
+    cursor = cnx.cursor()
+    cursor.execute(query)
 
+    for( moisture ) in cursor:
+        cd[prefix+"vege_moisture"] = "%3d"%moisture
 
+    cursor.close()
+
+def vege_temperature_query_db( cnx, query, cd, prefix = "" ):
+    """
+    Perform a query of the database and update dictionary "cd" with the
+    results for the vege garden temp sensor
+    """
+
+    cursor = cnx.cursor()
+    cursor.execute(query)
+
+    for( soil_temperature ) in cursor:
+        cd[prefix+"vege_soil_temperature"] = "%3.1f"%soil_temperature
+
+    cursor.close()
 
 
 env = Environment(
@@ -69,6 +96,7 @@ print("")
 
 DATABASE_NAME="GardenLab"
 TABLE_NAME="GardenLabData"
+SM_TABLE_NAME="SoilMoistureData"
 
 DAY_COND = " where ts > DATE_SUB( NOW(), INTERVAL 1 DAY )"
 WEEK_COND = " where ts > DATE_SUB( NOW(), INTERVAL 1 WEEK )"
@@ -99,8 +127,15 @@ cnx = mysql.connector.connect(user=USER_NAME, password=PASSWD,
 
 # Get the latest record in the database:
 latest_query = build_query( fields, TABLE_NAME, " ORDER BY id DESC LIMIT 1")
-
 query_db(cnx, latest_query, context_dict)
+
+vege_latest_query = build_query( vege_moisture_fields, SM_TABLE_NAME, 
+ " WHERE station='MOIS01' AND has_temperature=0 ORDER BY id DESC LIMIT 1")
+vege_moisture_query_db(cnx, vege_latest_query, context_dict)
+
+vege_latest_query = build_query( vege_temperature_fields, SM_TABLE_NAME, 
+ " WHERE station='MOIS01' AND has_temperature=1 ORDER BY id DESC LIMIT 1")
+vege_temperature_query_db(cnx, vege_latest_query, context_dict)
 
 # Get the min, max and average for the last 24 hours:
 
@@ -108,6 +143,16 @@ for (plab,period) in PERIODS:
     for ( flab, func) in FUNCS:
         query = build_query(fields, TABLE_NAME, period,func)
         query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
+
+        condition = "{} {}".format(period, "AND station='MOIS01' AND has_temperature=0")
+        query = build_query(vege_moisture_fields, SM_TABLE_NAME, condition,func)
+        vege_moisture_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
+
+        condition = "{} {}".format(period, "AND station='MOIS01' AND has_temperature=1")
+        query = build_query(vege_temperature_fields, SM_TABLE_NAME, 
+		condition,func)
+        vege_temperature_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
+
 
 
 cnx.close()

@@ -27,23 +27,25 @@ class PlotStyle(object):
     """
     Encapsulates a style of plot - line color, plot style etc
     """
-    def __init__( self, face_color, plot_type = PlotType.LINE ):
+    def __init__( self, face_color, plot_type = PlotType.LINE,
+	ymin = None, ymax=None ):
         self.face_color = face_color
         self.plot_type = plot_type
-        
+        self.ymin = ymin
+        self.ymax = ymax 
 
 
 plot_defs = {
-    "temperature" : PlotStyle("#05d005"),
-    "humidity" : PlotStyle("#d05050"),
-    "pressure" : PlotStyle("#0505d0"),
-    "battery_voltage" : PlotStyle("#d0d005"),
-    "wind_speed" : PlotStyle("#d0d0d0") ,
-    "panel_current" : PlotStyle("#00f000"),
+    "temperature" : PlotStyle("#05d005",ymin=0.0,ymax=40.),
+    "humidity" : PlotStyle("#d05050",ymin=0,ymax=100.0),
+    "pressure" : PlotStyle("#0505d0",ymin=940,ymax=1040),
+    "battery_voltage" : PlotStyle("#d0d005",ymin=11, ymax=15.0),
+    "wind_speed" : PlotStyle("#d0d0d0", ymin=0,ymax=15.0) ,
+    "panel_current" : PlotStyle("#00f000", ymin=0, ymax=4.0),
     "rainfall": PlotStyle("#5a2729",PlotType.HOURLY_BAR),
      "wind_direction": PlotStyle("#ffd700",PlotType.POLAR_PLOT),
-     "vege_moisture": PlotStyle("#d020d0"),
-     "vege_temperature": PlotStyle("#0200d0") }
+     "vege_moisture": PlotStyle("#d020d0", ymin=0,ymax=1024),
+     "vege_temperature": PlotStyle("#0200d0",ymin=0,ymax=20.0 ) }
 
 
 
@@ -58,7 +60,8 @@ def cm2inch(*tupl):
         return tuple(i/inch for i in tupl)
 
 
-def generate_24hr_plot(field, color='green', plot_type=PlotType.LINE):
+def generate_24hr_plot(field, color='green', plot_type=PlotType.LINE,
+	ymin = None, ymax = None):
     """
     Generate a 24 plot for the specified field
     """
@@ -132,6 +135,9 @@ def generate_24hr_plot(field, color='green', plot_type=PlotType.LINE):
         tick.label.set_fontsize(4)
     
     ax.autoscale_view()
+
+    if ymin != None and ymax != None:
+       ax.set_ylim(ymin,ymax)
     
     if plot_type != PlotType.POLAR_PLOT:
         fig.autofmt_xdate()
@@ -146,7 +152,10 @@ def generate_24hr_plot(field, color='green', plot_type=PlotType.LINE):
 def generate_all_latest_plots():
     for field in plot_defs.keys():
         generate_24hr_plot(field, plot_defs[field].face_color,
-                               plot_defs[field].plot_type)
+                               plot_defs[field].plot_type,
+                               plot_defs[field].ymin,
+                               plot_defs[field].ymax
+			)
 
 
 
