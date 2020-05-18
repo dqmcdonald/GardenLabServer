@@ -10,6 +10,7 @@ import time
 
 DATABASE_NAME="GardenLab"
 TABLE_NAME="GardenLabData"
+SM_TABLE_NAME="SoilMoistureData"
 
 # Read the password and username from an external file:
 pd= open("/home/pi/GardenLabServer/private.data").read().strip()
@@ -38,12 +39,26 @@ DATA_TABLE_DEF[TABLE_NAME] = ("CREATE TABLE `{0}` ("
                               " PRIMARY KEY (`id`) )".format(TABLE_NAME) )
                 
 
+DATA_TABLE_DEF[SM_TABLE_NAME] = ("CREATE TABLE `{0}` ("
+                              " `id` int(11) NOT NULL AUTO_INCREMENT,"
+                              " `ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+                              " `dt` DATE  NOT NULL,"
+                              " `moisture` float NOT NULL, "
+                              " `soil_temperature` float not NULL, "
+                              " `has_temperature` integer not NULL, "
+                              " `station` char(6) NOT NULL, "
+                              " PRIMARY KEY (`id`) )".format(SM_TABLE_NAME) )
+
 
 INSERT_DEF = ("INSERT into GardenLabData "
               "(dt, temperature, humidity, int_temp, pressure, load_current,"
               " battery_voltage, wind_speed, wind_direction, rainfall, panel_current ) "
               "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
 
+
+SM_INSERT_DEF = ("INSERT into SoilMoistureData "
+              "(dt, moisture, soil_temperature, has_temperature, station ) "
+              "VALUES (%s, %s, %s, %s, %s )")
 
 
 LATEST_QUERY_SQL = ("SELECT ts,{0} FROM GardenLabData WHERE ts > DATE_SUB("
@@ -61,7 +76,9 @@ WIND_DIRECTION_KEY = 'WDIR'
 WIND_SPEED_KEY = 'WSPD'
 RAINFALL_KEY = 'RAIN'
 PANEL_CURRENT_KEY = 'PCUR'
-       
+SOIL_TEMPERATURE_KEY = 'SOILTEMP'
+STATION_KEY = 'STATION'
+MOISTURE_KEY = 'MOISTURE'
 
 
 
@@ -75,6 +92,10 @@ def getopts():
     parser.add_argument('-c','--create',
                         action='store_true',
                         help='Create database')
+
+    parser.add_argument('-s','--sm_create',
+                        action='store_true',
+                        help='Create SM database')
 
     parser.add_argument('-l','--list',
                         action='store_true',
@@ -105,6 +126,23 @@ def create_table():
     print("Creating data with SQL expression")
     print(DATA_TABLE_DEF[TABLE_NAME])
     cursor.execute(DATA_TABLE_DEF[TABLE_NAME])
+    cnx.close()
+
+def create_sm_table():
+    """
+    Create the soil moisture database table and define the fields
+    """
+    cnx = open_database()
+    
+    cursor = cnx.cursor()
+    print("Deleting table")
+    try:
+        cursor.execute("DROP TABLE `{0}`".format(SM_TABLE_NAME))
+    except:
+        pass
+    print("Creating data with SQL expression")
+    print(DATA_TABLE_DEF[SM_TABLE_NAME])
+    cursor.execute(DATA_TABLE_DEF[SM_TABLE_NAME])
     cnx.close()
 
 
@@ -159,11 +197,41 @@ def list_last_record():
     cursor.close()
     cnx.close()
 
-def insert_data_from_dict( post_args ):
-    """
-    Insert values into DB table from the args dictionary
-    """
 
+def insert_soil_moisture_data( post_args ):
+    """
+    Insert values into SoilMoisture DB table from the args dictionary
+    """
+    moisture = 0.0
+    try:
+        moisture = float(post_args[MOISTURE_KEY][0])
+    except:
+        moisture = 0.0
+
+    soil_temperature = 0.0
+    try:
+        soil_temperature = float(post_args[SOIL_TEMPERATURE_KEY][0])
+        soil_temperature = soil_temperature/100.0  # Was stored as integer
+        has_temperature = 1
+    except:
+        has_temperature = 0
+
+    station = (post_args[STATION_KEY][0]).decode("utf-8") 
+
+    cnx = mysql.connector.connect(user=USER_NAME, password=PASSWD,
+                                 database=DATABASE_NAME )
+    
+    cursor = cnx.cursor()
+    cursor.execute(SM_INSERT_DEF,(time.strftime("%Y-%m-%d"),moisture, 
+       soil_temperature, has_temperature, station ))
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+
+def insert_gardenlab_data( post_args ):
+    """
+    Insert values into GardenLab DB table from the args dictionary
+    """
     temp = float(post_args[TEMPERATURE_KEY][0])
     humi = float(post_args[HUMIDITY_KEY][0])
     itmp = float(post_args[INTERNAL_TEMP_KEY][0])
@@ -189,6 +257,21 @@ def insert_data_from_dict( post_args ):
     cursor.close()
     cnx.close()
 
+
+
+def insert_data_from_dict( post_args ):
+    """
+    Insert values into DB table from the args dictionary
+    """
+
+    if MOISTURE_KEY in post_args or SOIL_TEMPERATURE_KEY in post_args:
+        insert_soil_moisture_data( post_args )
+    else:
+        insert_gardenlab_data( post_args )
+
+
+
+
 def count_records():
     """
     Return the number of records
@@ -207,6 +290,9 @@ def count_records():
     cnx.close()
 
     return count
+
+
+
 
 
 def open_database():
@@ -230,7 +316,19 @@ def last_day_data( field ) :
     cnx = open_database()
     cursor = cnx.cursor()
 
-    cursor.execute( LATEST_QUERY_SQL.format(field) )
+
+    # handle soil moisture and temperature differently:
+    query = ""
+    if field == 'vege_moisture':
+          query = ("SELECT ts,moisture FROM SoilMoistureData WHERE ts > DATE_SUB( NOW(),  INTERVAL 24 HOUR) and has_temperature = 0 and station = 'MOIS01'" )
+
+    elif field == 'vege_temperature':
+          query = ("SELECT ts,soil_temperature FROM SoilMoistureData WHERE ts > DATE_SUB( NOW(),  INTERVAL 24 HOUR) and has_temperature = 1 and station = 'MOIS01'" )
+    else:
+          query = LATEST_QUERY_SQL.format(field)
+ 
+    cursor.execute( query )
+
     for( dt, val) in cursor:
         dates.append(dt)
         data.append(val)
@@ -249,6 +347,8 @@ def main():
           list_last_record()
       if opts.tdata:
           test_data()
+      if opts.sm_create:
+          create_sm_table()
           
 
 

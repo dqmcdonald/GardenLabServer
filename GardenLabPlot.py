@@ -41,7 +41,9 @@ plot_defs = {
     "wind_speed" : PlotStyle("#d0d0d0") ,
     "panel_current" : PlotStyle("#00f000"),
     "rainfall": PlotStyle("#5a2729",PlotType.HOURLY_BAR),
-     "wind_direction": PlotStyle("#ffd700",PlotType.POLAR_PLOT)}
+     "wind_direction": PlotStyle("#ffd700",PlotType.POLAR_PLOT),
+     "vege_moisture": PlotStyle("#d020d0"),
+     "vege_temperature": PlotStyle("#0200d0") }
 
 
 
