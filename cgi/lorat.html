@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>LoRat</title>
+    <meta http-equiv="refresh" content="60">
+
+  <style>
+	.page {
+    		min-height: 200px;
+    		min-width: 100px;
+	}
+	body {
+    	background-color: #cccccc;
+	}
+       table, th, td {
+       border: 1px solid black;
+       border-collapse: collapse;
+	}
+	td {
+	text-align: center;
+        }
+   </style>
+
+
+  </head>
+  <body>
+    <H1>Welcome to LoRat</H1>
+    <H3>Recent trap triggerings:</H3>
+
+    <table style="width:50%">
+    <TH> Date </TH> <TH> Trap </TH>
+    {% for item in items %}
+    <TR>
+   <TD>{{item.date}}</TD>
+   <TD>{{item.station}}</TD>
+   </TR>
+    {% endfor %}
+   </table>
+  <br>
+
+  <form action="/cgi-bin/lorat.py" >
+  <label for="limit">Show only records from:  </label>
+  <input type="date" id="limit" name="date" value={{default_cutoff}}>
+  <input type="submit">  
+  </form>
+
+  </body>
+</html>

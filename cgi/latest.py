@@ -4,6 +4,10 @@ from jinja2 import Environment, FileSystemLoader
 import mysql.connector
 import datetime
 
+import cgitb
+cgitb.enable()
+
+
 
 fields = ["id", "ts", "temperature", "humidity", "pressure", "battery_voltage",
           "panel_current", "wind_speed", "rainfall", "wind_direction"]
@@ -89,7 +93,6 @@ env = Environment(
    loader=FileSystemLoader('/home/pi/GardenLabServer/cgi')
    ) 
 
-import cgitb
 
 print( "Content-Type: text/html;charset=utf-8")
 print("")
@@ -114,10 +117,15 @@ context_dict = {}
 
 
 # Read the password and username from an external file:
-pd= open("/home/pi/GardenLabServer/private.data").read().strip()
-pd = pd.split(" ")
-USER_NAME=pd[0]
-PASSWD=pd[1]
+with open("/home/pi/GardenLabServer/private.data") as private_data:
+        lines = private_data.readlines()
+
+pd = lines[0].split(" ")
+USER_NAME=pd[0].strip()
+PASSWD=pd[1].strip()
+
+
+
     
 cnx = mysql.connector.connect(user=USER_NAME, password=PASSWD,
                                  database=DATABASE_NAME )
