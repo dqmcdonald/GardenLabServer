@@ -7,16 +7,25 @@
 import argparse
 import mysql.connector
 import time
+import smtplib
 
 DATABASE_NAME="GardenLab"
 TABLE_NAME="GardenLabData"
 SM_TABLE_NAME="SoilMoistureData"
+LR_TABLE_NAME="LoRatData"
 
 # Read the password and username from an external file:
-pd= open("/home/pi/GardenLabServer/private.data").read().strip()
-pd = pd.split(" ")
-USER_NAME=pd[0]
-PASSWD=pd[1]
+
+with open("/home/pi/GardenLabServer/private.data") as private_data:
+	lines = private_data.readlines()
+
+pd = lines[0].split(" ")
+USER_NAME=pd[0].strip()
+PASSWD=pd[1].strip()
+
+pd = lines[1].split(" ")
+GMAIL_USER=pd[0].strip()
+GMAIL_PASSWORD=pd[1].strip()
 
 
 
@@ -49,6 +58,13 @@ DATA_TABLE_DEF[SM_TABLE_NAME] = ("CREATE TABLE `{0}` ("
                               " `station` char(6) NOT NULL, "
                               " PRIMARY KEY (`id`) )".format(SM_TABLE_NAME) )
 
+DATA_TABLE_DEF[LR_TABLE_NAME] = ("CREATE TABLE `{0}` ("
+                              " `id` int(11) NOT NULL AUTO_INCREMENT,"
+                              " `ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+                              " `dt` DATE  NOT NULL,"
+                              " `station` char(8) NOT NULL, "
+                              " PRIMARY KEY (`id`) )".format(LR_TABLE_NAME) )
+
 
 INSERT_DEF = ("INSERT into GardenLabData "
               "(dt, temperature, humidity, int_temp, pressure, load_current,"
@@ -59,6 +75,10 @@ INSERT_DEF = ("INSERT into GardenLabData "
 SM_INSERT_DEF = ("INSERT into SoilMoistureData "
               "(dt, moisture, soil_temperature, has_temperature, station ) "
               "VALUES (%s, %s, %s, %s, %s )")
+
+LR_INSERT_DEF = ("INSERT into LoRatData "
+              "(dt, station ) "
+              "VALUES (%s, %s )")
 
 
 LATEST_QUERY_SQL = ("SELECT ts,{0} FROM GardenLabData WHERE ts > DATE_SUB("
@@ -79,6 +99,7 @@ PANEL_CURRENT_KEY = 'PCUR'
 SOIL_TEMPERATURE_KEY = 'SOILTEMP'
 STATION_KEY = 'STATION'
 MOISTURE_KEY = 'MOISTURE'
+LORAT_KEY = 'LORAT'
 
 
 
@@ -96,6 +117,10 @@ def getopts():
     parser.add_argument('-s','--sm_create',
                         action='store_true',
                         help='Create SM database')
+
+    parser.add_argument('-r','--lr_create',
+                        action='store_true',
+                        help='Create LoRat database')
 
     parser.add_argument('-l','--list',
                         action='store_true',
@@ -144,6 +169,24 @@ def create_sm_table():
     print(DATA_TABLE_DEF[SM_TABLE_NAME])
     cursor.execute(DATA_TABLE_DEF[SM_TABLE_NAME])
     cnx.close()
+
+def create_lr_table():
+    """
+    Create the LoRat database table and define the fields
+    """
+    cnx = open_database()
+    
+    cursor = cnx.cursor()
+    print("Deleting table")
+    try:
+        cursor.execute("DROP TABLE `{0}`".format(LR_TABLE_NAME))
+    except:
+        pass
+    print("Creating data with SQL expression")
+    print(DATA_TABLE_DEF[LR_TABLE_NAME])
+    cursor.execute(DATA_TABLE_DEF[LR_TABLE_NAME])
+    cnx.close()
+
 
 
 def test_data():
@@ -198,6 +241,39 @@ def list_last_record():
     cnx.close()
 
 
+def send_lora_email( station ):
+    """
+    Send email to notifiy of rat trap being set off
+    """
+
+
+    sent_from = GMAIL_USER
+    to = ['dqmcdonald@gmail.com']
+    subject = 'Rat Trap Triggered'
+
+    email_text = """\
+From: %s
+To: %s
+Subject: %s
+
+Trap triggeed: %s
+""" % (sent_from, to, subject, station)
+
+    try:
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.ehlo()
+        server.login(GMAIL_USER, GMAIL_PASSWORD)
+        server.sendmail(sent_from, to, email_text)
+        server.close()
+
+        print( 'Email sent!')
+    except:
+        print( 'Something went wrong...')
+
+
+
+
+
 def insert_soil_moisture_data( post_args ):
     """
     Insert values into SoilMoisture DB table from the args dictionary
@@ -227,6 +303,25 @@ def insert_soil_moisture_data( post_args ):
     cnx.commit()
     cursor.close()
     cnx.close()
+
+def insert_lorat_data( post_args ):
+    """
+    Insert values into LoRat DB table from the args dictionary
+    """
+
+    station = (post_args[LORAT_KEY][0]).decode("utf-8") 
+
+    cnx = mysql.connector.connect(user=USER_NAME, password=PASSWD,
+                                 database=DATABASE_NAME )
+    
+    cursor = cnx.cursor()
+    cursor.execute(LR_INSERT_DEF,(time.strftime("%Y-%m-%d"), station ))
+    cnx.commit()
+    cursor.close()
+    cnx.close()
+
+    send_lora_email( station )
+
 
 def insert_gardenlab_data( post_args ):
     """
@@ -266,6 +361,8 @@ def insert_data_from_dict( post_args ):
 
     if MOISTURE_KEY in post_args or SOIL_TEMPERATURE_KEY in post_args:
         insert_soil_moisture_data( post_args )
+    elif LORAT_KEY in post_args:
+        insert_lorat_data( post_args )
     else:
         insert_gardenlab_data( post_args )
 
@@ -349,6 +446,8 @@ def main():
           test_data()
       if opts.sm_create:
           create_sm_table()
+      if opts.lr_create:
+          create_lr_table()
           
 
 
