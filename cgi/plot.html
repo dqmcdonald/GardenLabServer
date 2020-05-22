@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>GardenLab Plotting</title>
+    <meta http-equiv="refresh" content="60">
+
+  <style>
+	.page {
+    		min-height: 200px;
+    		min-width: 100px;
+	}
+	body {
+    	background-color: #cccccc;
+	}
+       table, th, td {
+       border: 1px solid black;
+       border-collapse: collapse;
+	}
+	td {
+	text-align: center;
+        }
+   </style>
+
+
+  </head>
+  <body>
+    <H1>Garden Lab Data Plotting</H1>
+
+  <br>
+  <form action="/cgi-bin/plot.py" >
+  <label for="field">Data to plot:  </label>
+  <select type="" id="field" name="field"  >
+	<option value="temperature" {{temperature_selected}}>Temperature</option>
+        <option value="humidity" {{humidity_selected}} >Humidity</option>
+  </select>
+  <input type="submit">  
+  </form>
+  <br>
+
+   <img src='data:image/png;base64,{{plot_string}}' />
+
+
+  </body>
+</html>

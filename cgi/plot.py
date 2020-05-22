@@ -1,67 +1,101 @@
-#!/usr/bin/env python
-from __future__ import print_function
-
-import os,sys
+#!/usr/bin/python3
+##!/usr/bin/env python3
+from jinja2 import Environment, FileSystemLoader
+import mysql.connector
+import datetime
 import cgi
-import cgitb; cgitb.enable()
+import cgitb
+import os
+import sys
+import matplotlib.pyplot as plt
+from io import BytesIO
+import base64
 
 
-from table import Table
-from page import Page
-from form import Form
-from formselect import FormSelect
+cgitb.enable()
 
 
-fields = [ "temperature", "humidity", "pressure", "battery_voltage",
-          "panel_current", "load_current", "wind_speed", "rainfall", "wind_direction"]
+DATABASE_NAME="GardenLab"
+TABLE_NAME="GardenLabData"
 
-
-
-def getFormValues(form):
+def plot_data( dates, data ):
     """
-    Returns a dictionary with either the values sent by the form or default values
-    for the various form elements
+    Plot the data and return the plot as a string
     """
+    fig = plt.figure()
+    plt.plot(dates, data )
+    figdata = BytesIO()
+    fig.savefig(figdata, format='png')
+   
+    image_base64 = base64.b64encode(figdata.getvalue()).decode(
+       'utf-8').replace('\n', '')
+    figdata.close()
+    return image_base64
+
+
+def query_db( cnx, field):
+    """
+    Perform a query of the database for field and return a tuple of lists
+    - time and value
+    """
+
+    cursor = cnx.cursor()
+    query = ("SELECT ts, {} from {} WHERE ts > DATE_SUB(NOW(),  INTERVAL 24 HOUR)".format(field, TABLE_NAME));
+    cursor.execute(query)
+
+    dates = []
+    data = []
+    for( dt, val ) in cursor:
+        dates.append(dt)
+        data.append(val)
+    cursor.close()
+
+    return( dates, data)
+
+env = Environment(
+   loader=FileSystemLoader('/home/pi/GardenLabServer/cgi')
+   ) 
+
+
+print( "Content-Type: text/html;charset=utf-8")
+print("")
+
+
+form = cgi.FieldStorage()
+form = cgi.FieldStorage()
+if "field" in form:
+   field_type =  form["field"].value
+else:
+   field_type = "temperature"
+
+
+context_dict = {}
+
+if field_type == "temperture":
+    context_dict["temperature_selected"] = "selected"
+elif field_type == "humidity":
+    context_dict["humidity_selected"] = "selected"
+
+# Read the password and username from an external file:
+with open("/home/pi/GardenLabServer/private.data") as private_data:
+        lines = private_data.readlines()
+
+pd = lines[0].split(" ")
+USER_NAME=pd[0].strip()
+PASSWD=pd[1].strip()
+
     
-    d = {}
-    if "field" in form.keys():
-        d["field"] = form["field"].value
-    else:
-        d["field"] = fields[0]
-    
-    return d
+cnx = mysql.connector.connect(user=USER_NAME, password=PASSWD,
+                                 database=DATABASE_NAME )
+
+
+(dates,data) = query_db(cnx, field_type)
 
 
 
+context_dict["plot_string"] = plot_data( dates, data )
 
 
-def showPage():
-
-    #Deals with inputing data into python from the html form
-    form = cgi.FieldStorage()
-    
-    
-    form_settings = getFormValues(form)
-    
-    
-    
-    p = Page("GardenLab Plotting")
-    
-    f = Form("/cgi/plot.py","POST","Generate Plot")
-    fs = FormSelect("field",fields,form_settings["field"], "Data to plot:")
-    
-    f.addContent(fs)
-    
-    
-    p.addContent(f)
-    
-    
-    
-    print(p)
-    print(form_settings["field"])
-
-
-
-if __name__ == "__main__":
-    showPage()
-
+cnx.close()
+template = env.get_template('plot.html')
+print( template.render(context_dict))

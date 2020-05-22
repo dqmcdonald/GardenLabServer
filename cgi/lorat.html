@@ -28,6 +28,14 @@
     <H1>Welcome to LoRat</H1>
     <H3>Recent trap triggerings:</H3>
 
+  <br>
+  <form action="/cgi-bin/lorat.py" >
+  <label for="limit">Show only records from:  </label>
+  <input type="date" id="limit" name="date" value={{default_cutoff}}>
+  <input type="submit">  
+  </form>
+  <br>
+
     <table style="width:50%">
     <TH> Date </TH> <TH> Trap </TH>
     {% for item in items %}
@@ -39,11 +47,6 @@
    </table>
   <br>
 
-  <form action="/cgi-bin/lorat.py" >
-  <label for="limit">Show only records from:  </label>
-  <input type="date" id="limit" name="date" value={{default_cutoff}}>
-  <input type="submit">  
-  </form>
 
   </body>
 </html>

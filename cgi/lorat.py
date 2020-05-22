@@ -5,6 +5,8 @@ import mysql.connector
 import datetime
 import cgi
 import cgitb
+import os
+import sys
 cgitb.enable()
 
 
