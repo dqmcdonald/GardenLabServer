@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>CASH TC1 Seismograph</title>
+
+  <style>
+	.page {
+    		min-height: 200px;
+    		min-width: 100px;
+	}
+	body {
+    	background-color: #cccccc;
+	}
+       table, th, td {
+       border: 1px solid black;
+       border-collapse: collapse;
+	}
+	td {
+	text-align: center;
+        }
+   </style>
+
+
+  </head>
+  <body>
+    <H1>CASH TC1 Seismograph</H1>
+
+ <br>
+  <form action="/cgi-bin/CASH.py" >
+  <label for="limit">Show plot for:  </label>
+  <input type="date" id="limit" name="date" value={{default_day}}>
+  <label for="scale">Scale Data:  </label>
+  <input type="scale" id="scale" name="scale" value={{default_scale}}>
+  <input type="submit">
+  </form>
+  <br>
+
+   <img src='data:image/png;base64,{{plot_string}}' />
+
+
+  </body>
+</html>
