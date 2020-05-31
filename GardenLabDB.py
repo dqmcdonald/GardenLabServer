@@ -421,6 +421,9 @@ def last_day_data( field ) :
 
     elif field == 'vege_temperature':
           query = ("SELECT ts,soil_temperature FROM SoilMoistureData WHERE ts > DATE_SUB( NOW(),  INTERVAL 24 HOUR) and has_temperature = 1 and station = 'MOIS01'" )
+    elif field == 'lemon_moisture':
+          query = ("SELECT ts,moisture FROM SoilMoistureData WHERE ts > DATE_SUB( NOW(),  INTERVAL 24 HOUR) and has_temperature = 0 and station = 'MOIS02'" )
+
     else:
           query = LATEST_QUERY_SQL.format(field)
  

@@ -14,6 +14,7 @@ fields = ["id", "ts", "temperature", "humidity", "pressure", "battery_voltage",
 
 vege_moisture_fields = ["moisture"]
 vege_temperature_fields = ["soil_temperature"]
+lemon_moisture_fields = ["moisture"]
 
 def build_query( fields, table, condition, func=None):
     """
@@ -73,6 +74,21 @@ def vege_moisture_query_db( cnx, query, cd, prefix = "" ):
         cd[prefix+"vege_moisture"] = "%3d"%moisture
 
     cursor.close()
+
+def lemon_moisture_query_db( cnx, query, cd, prefix = "" ):
+    """
+    Perform a query of the database and update dictionary "cd" with the
+    results for the lemon pot moisture sensor
+    """
+
+    cursor = cnx.cursor()
+    cursor.execute(query)
+
+    for( moisture ) in cursor:
+        cd[prefix+"lemon_moisture"] = "%3d"%moisture
+
+    cursor.close()
+
 
 def vege_temperature_query_db( cnx, query, cd, prefix = "" ):
     """
@@ -145,6 +161,10 @@ vege_latest_query = build_query( vege_temperature_fields, SM_TABLE_NAME,
  " WHERE station='MOIS01' AND has_temperature=1 ORDER BY id DESC LIMIT 1")
 vege_temperature_query_db(cnx, vege_latest_query, context_dict)
 
+lemon_latest_query = build_query( lemon_moisture_fields, SM_TABLE_NAME, 
+ " WHERE station='MOIS02' AND has_temperature=0 ORDER BY id DESC LIMIT 1")
+lemon_moisture_query_db(cnx, lemon_latest_query, context_dict)
+
 # Get the min, max and average for the last 24 hours:
 
 for (plab,period) in PERIODS:
@@ -161,6 +181,9 @@ for (plab,period) in PERIODS:
 		condition,func)
         vege_temperature_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
 
+        condition = "{} {}".format(period, "AND station='MOIS02' AND has_temperature=0")
+        query = build_query(lemon_moisture_fields, SM_TABLE_NAME, condition,func)
+        lemon_moisture_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
 
 
 cnx.close()

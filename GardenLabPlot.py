@@ -45,7 +45,8 @@ plot_defs = {
     "rainfall": PlotStyle("#5a2729",PlotType.HOURLY_BAR),
      "wind_direction": PlotStyle("#ffd700",PlotType.POLAR_PLOT),
      "vege_moisture": PlotStyle("#d020d0", ymin=0,ymax=1024),
-     "vege_temperature": PlotStyle("#0200d0",ymin=0,ymax=20.0 ) }
+     "vege_temperature": PlotStyle("#0200d0",ymin=0,ymax=20.0 ),
+     "lemon_moisture": PlotStyle("#d03030", ymin=0,ymax=1024)}
 
 
 
