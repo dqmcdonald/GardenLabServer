@@ -7,6 +7,8 @@ import cgi
 import cgitb
 import os
 import sys
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from io import BytesIO
 import os.path
@@ -42,7 +44,7 @@ def get_file_names( date ):
    
 
 
-def plot_data( st, scale, date ):
+def plot_day_data( st, scale, date ):
     """
     Plot the data and return the plot as a string
     """
@@ -55,10 +57,31 @@ def plot_data( st, scale, date ):
         color=['b', 'g', 'b', 'g'], show_y_UTC_label=True,
         title = title, linewidth=0.5 )
    
-    image_base64 = base64.b64encode(data).decode(
-       'utf-8').replace('\n', '')
+    image_base64 = base64.b64encode(data).decode('utf-8').replace('\n', '')
     return image_base64
 
+def plot_detail_data( sts, hour, lower_min, upper_min ):
+    """
+    Plot the detail data and return the plot as a string
+    """
+
+    if hour >= 12:
+        idx = hour - 12
+    else:
+        idx = hour + 12
+
+    try:
+        st = sts[idx]
+    except:
+        return ""
+    fig = plt.figure()
+    dt = st[0].stats.starttime
+    data=st.plot(figure=fig, format='png', color='red', starttime= dt +
+        lower_min*60, endtime = dt + upper_min*60, number_of_ticks=5,
+        tick_format = ':%M', linewidth=0.5)
+
+    image_base64 = base64.b64encode(data).decode('utf-8').replace('\n', '')
+    return image_base64
 
 env = Environment(
    loader=FileSystemLoader('/home/pi/GardenLabServer/cgi')
@@ -76,6 +99,38 @@ if "scale" in form:
    default_scale =  form["scale"].value
 else:
     default_scale = 1000
+
+if "hour" in form:
+   default_hour =  int(form["hour"].value)
+else:
+    default_hour = 12
+
+if default_hour > 23:
+    default_hour = 23
+if default_hour < 0:
+    default_hour = 0
+
+
+if "lower_minute" in form:
+   default_lower_minute =  int(form["lower_minute"].value)
+else:
+    default_lower_minute = 0
+
+if default_lower_minute < 0:
+    default_lower_minute = 0
+if default_lower_minute > 60:
+    default_lower_minute = 59
+
+if "upper_minute" in form:
+   default_upper_minute =  int(form["upper_minute"].value)
+else:
+    default_upper_minute = 60
+
+if default_upper_minute < 0:
+    default_upper_minute = 0
+if default_upper_minute > 60:
+    default_upper_minute = 59
+
 
 print( "Content-Type: text/html;charset=utf-8")
 print("")
@@ -103,10 +158,15 @@ if len(streams) > 1:
         st += s
 
 if streams:
-    context_dict["plot_string"] = plot_data(st, int(default_scale), 
+    context_dict["plot_string"] = plot_day_data(st, int(default_scale), 
             default_date)
+    context_dict["plot_detail_string"] = plot_detail_data( streams,
+        default_hour, default_lower_minute,default_upper_minute )
 context_dict["default_scale"] = default_scale
 context_dict["default_day"] = default_date
+context_dict["default_lower_minute"] = default_lower_minute
+context_dict["default_upper_minute"] = default_upper_minute
+context_dict["default_hour"] = default_hour
 
 
 template = env.get_template('CASH.html')

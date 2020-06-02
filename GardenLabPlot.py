@@ -39,14 +39,14 @@ plot_defs = {
     "temperature" : PlotStyle("#05d005",ymin=0.0,ymax=40.),
     "humidity" : PlotStyle("#d05050",ymin=0,ymax=100.0),
     "pressure" : PlotStyle("#0505d0",ymin=940,ymax=1040),
-    "battery_voltage" : PlotStyle("#d0d005",ymin=11, ymax=15.0),
+    "battery_voltage" : PlotStyle("#a0a075",ymin=11, ymax=15.0),
     "wind_speed" : PlotStyle("#d0d0d0", ymin=0,ymax=15.0) ,
     "panel_current" : PlotStyle("#00f000", ymin=0, ymax=4.0),
     "rainfall": PlotStyle("#5a2729",PlotType.HOURLY_BAR),
      "wind_direction": PlotStyle("#ffd700",PlotType.POLAR_PLOT),
      "vege_moisture": PlotStyle("#d020d0", ymin=0,ymax=1024),
      "vege_temperature": PlotStyle("#0200d0",ymin=0,ymax=20.0 ),
-     "lemon_moisture": PlotStyle("#d03030", ymin=0,ymax=1024)}
+     "lemon_moisture": PlotStyle("#e0e330", ymin=0,ymax=1024)}
 
 
 

@@ -32,11 +32,25 @@
   <input type="date" id="limit" name="date" value={{default_day}}>
   <label for="scale">Scale Data:  </label>
   <input type="scale" id="scale" name="scale" value={{default_scale}}>
+  <br>
+  <label for="hour">Show detail for hour:  </label>
+  <input type="hour" id="hour" name="hour" size=3 value={{default_hour}}>
+  <label for="lower_minute">From minute:  </label>
+  <input type="lower_minute" id="lower_minute" size=3 name="lower_minute" 
+	value={{default_lower_minute}}>
+  <label for="upper_minute">to minute:  </label>
+  <input type="upper_minute" id="upper_minute" size=3 name="upper_minute" 
+	value={{default_upper_minute}}>
+  <br>
   <input type="submit">
   </form>
   <br>
 
    <img src='data:image/png;base64,{{plot_string}}' />
+
+<br>
+   <img src='data:image/png;base64,{{plot_detail_string}}' />
+
 
 
   </body>
