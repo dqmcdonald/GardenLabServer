@@ -15,6 +15,7 @@ fields = ["id", "ts", "temperature", "humidity", "pressure", "battery_voltage",
 vege_moisture_fields = ["moisture"]
 vege_temperature_fields = ["soil_temperature"]
 lemon_moisture_fields = ["moisture"]
+eightyA_moisture_fields = ["moisture"]
 
 def build_query( fields, table, condition, func=None):
     """
@@ -49,14 +50,22 @@ def query_db( cnx, query, cd, prefix = "" ):
             cd["time_stamp"]=ts.strftime("%H:%M:%S  %d %B %Y")
         else:
             cd[prefix+"time_stamp"] = ts
-        cd[prefix+"temperature"] = "%3.1f"%tmp
-        cd[prefix+"humidity"]="%3.1f"%h
-        cd[prefix+"pressure"]=int(p)
-        cd[prefix+"battery_voltage"] = "%5.2f"%v
-        cd[prefix+"panel_current"] = "%5.3f"%pc
-        cd[prefix+"wind_speed"] = "%3.1f"%ws
-        cd[prefix+"rainfall"]= "%3.1f"%rf
-        cd[prefix+"wind_direction"] = wd
+        if tmp is not None:
+            cd[prefix+"temperature"] = "%3.1f"%tmp
+        if h is not None:
+            cd[prefix+"humidity"]="%3.1f"%h
+        if p is not None:
+            cd[prefix+"pressure"]=int(p)
+        if v is not None:
+            cd[prefix+"battery_voltage"] = "%5.2f"%v
+        if pc is not None:
+            cd[prefix+"panel_current"] = "%5.3f"%pc
+        if ws is not None:
+            cd[prefix+"wind_speed"] = "%3.1f"%ws
+        if rf is not None:
+            cd[prefix+"rainfall"]= "%3.1f"%rf
+        if wd is not None:
+            cd[prefix+"wind_direction"] = wd
 
     cursor.close()
 
@@ -71,7 +80,8 @@ def vege_moisture_query_db( cnx, query, cd, prefix = "" ):
     cursor.execute(query)
 
     for( moisture ) in cursor:
-        cd[prefix+"vege_moisture"] = "%3d"%moisture
+        if moisture[0] is not None:
+            cd[prefix+"vege_moisture"] = "{:3.0f}".format(moisture[0])
 
     cursor.close()
 
@@ -85,7 +95,24 @@ def lemon_moisture_query_db( cnx, query, cd, prefix = "" ):
     cursor.execute(query)
 
     for( moisture ) in cursor:
-        cd[prefix+"lemon_moisture"] = "%3d"%moisture
+        if moisture[0] is not  None:
+            cd[prefix+"lemon_moisture"] = "{:3.0f}".format(moisture[0])
+
+    cursor.close()
+
+
+def eightyA_moisture_query_db( cnx, query, cd, prefix = "" ):
+    """
+    Perform a query of the database and update dictionary "cd" with the
+    results for eightyA moisture
+    """
+
+    cursor = cnx.cursor()
+    cursor.execute(query)
+
+    for( moisture ) in cursor:
+        if moisture[0] is not  None:
+            cd[prefix+"eightyA_moisture"] = "{:3.0f}".format(moisture[0])
 
     cursor.close()
 
@@ -100,7 +127,9 @@ def vege_temperature_query_db( cnx, query, cd, prefix = "" ):
     cursor.execute(query)
 
     for( soil_temperature ) in cursor:
-        cd[prefix+"vege_soil_temperature"] = "%3.1f"%soil_temperature
+        if soil_temperature[0] is not None:
+            cd[prefix+"vege_soil_temperature"] = "{:3.1f}".format(
+                soil_temperature[0])
 
     cursor.close()
 
@@ -165,6 +194,11 @@ lemon_latest_query = build_query( lemon_moisture_fields, SM_TABLE_NAME,
  " WHERE station='MOIS02' AND has_temperature=0 ORDER BY id DESC LIMIT 1")
 lemon_moisture_query_db(cnx, lemon_latest_query, context_dict)
 
+eightyA_latest_query = build_query( eightyA_moisture_fields, SM_TABLE_NAME, 
+ " WHERE station='MOIS03' AND has_temperature=0 ORDER BY id DESC LIMIT 1")
+eightyA_moisture_query_db(cnx, eightyA_latest_query, context_dict)
+
+
 # Get the min, max and average for the last 24 hours:
 
 for (plab,period) in PERIODS:
@@ -184,6 +218,11 @@ for (plab,period) in PERIODS:
         condition = "{} {}".format(period, "AND station='MOIS02' AND has_temperature=0")
         query = build_query(lemon_moisture_fields, SM_TABLE_NAME, condition,func)
         lemon_moisture_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
+
+        condition = "{} {}".format(period, "AND station='MOIS03' AND has_temperature=0")
+        query = build_query(lemon_moisture_fields, SM_TABLE_NAME, condition,func)
+        query = build_query(eightyA_moisture_fields, SM_TABLE_NAME, condition,func)
+        eightyA_moisture_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
 
 
 cnx.close()

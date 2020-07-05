@@ -44,9 +44,10 @@ plot_defs = {
     "panel_current" : PlotStyle("#00f000", ymin=0, ymax=4.0),
     "rainfall": PlotStyle("#5a2729",PlotType.HOURLY_BAR),
      "wind_direction": PlotStyle("#ffd700",PlotType.POLAR_PLOT),
+     "80A_moisture": PlotStyle("#300030", ymin=0,ymax=1024),
+     "lemon_moisture": PlotStyle("#e0e330", ymin=0,ymax=1024),
      "vege_moisture": PlotStyle("#d020d0", ymin=0,ymax=1024),
-     "vege_temperature": PlotStyle("#0200d0",ymin=0,ymax=20.0 ),
-     "lemon_moisture": PlotStyle("#e0e330", ymin=0,ymax=1024)}
+     "vege_temperature": PlotStyle("#0200d0",ymin=0,ymax=20.0 )}
 
 
 
@@ -129,11 +130,17 @@ def generate_24hr_plot(field, color='green', plot_type=PlotType.LINE,
         ax.xaxis.set_major_formatter(hours_fmt)
         ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))    
 
-    for tick in ax.xaxis.get_major_ticks():
-        tick.label.set_fontsize(4)
+    try:
+        for tick in ax.xaxis.get_major_ticks():
+            tick.label.set_fontsize(4)
+    except RuntimeError:
+        pass
 
-    for tick in ax.yaxis.get_major_ticks():
-        tick.label.set_fontsize(4)
+    try:
+        for tick in ax.yaxis.get_major_ticks():
+            tick.label.set_fontsize(4)
+    except RuntimeError:
+        pass
     
     ax.autoscale_view()
 
@@ -141,7 +148,10 @@ def generate_24hr_plot(field, color='green', plot_type=PlotType.LINE,
        ax.set_ylim(ymin,ymax)
     
     if plot_type != PlotType.POLAR_PLOT:
-        fig.autofmt_xdate()
+        try:
+            fig.autofmt_xdate()
+        except RuntimeError:
+            pass
 
     plt.show
     
@@ -152,6 +162,7 @@ def generate_24hr_plot(field, color='green', plot_type=PlotType.LINE,
 
 def generate_all_latest_plots():
     for field in plot_defs.keys():
+        print(field)
         generate_24hr_plot(field, plot_defs[field].face_color,
                                plot_defs[field].plot_type,
                                plot_defs[field].ymin,
