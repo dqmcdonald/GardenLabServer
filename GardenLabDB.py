@@ -8,6 +8,9 @@ import argparse
 import mysql.connector
 import time
 import smtplib
+import pickle
+import os
+import datetime
 
 DATABASE_NAME="GardenLab"
 TABLE_NAME="GardenLabData"
@@ -26,6 +29,51 @@ PASSWD=pd[1].strip()
 pd = lines[1].split(" ")
 GMAIL_USER=pd[0].strip()
 GMAIL_PASSWORD=pd[1].strip()
+
+LAST_EMAIL_DATA_FILE = '/home/pi/GardenLabServer/last_email.data'
+
+LEMON_ADDRESS = ['dqmcdonald@gmail.com','beatrice.cheer@gmail.com']
+VEGE_ADDRESS = ['dqmcdonald@gmail.com' ]
+EIGHTYA_ADDRESS = ['dqmcdonald@gmail.com' ]
+
+VEGE_KEY =    'MOIS01'
+LEMON_KEY =   'MOIS02'
+EIGHTYA_KEY = 'MOIS03'
+
+# arbitrary default date for starting point, only needs to be some time
+# in the past.
+default_date = datetime.date(2020,9,1)
+
+# Stores the date when the last email was sent. Pickled to a file and used
+# to only send a single email per-day
+last_emails = { LEMON_KEY:default_date,
+                VEGE_KEY:default_date,
+                EIGHTYA_KEY:default_date }
+
+
+# Descriptive names used to send email:
+MOISTURE_EMAIL_NAMES = { 
+                LEMON_KEY:   "lemon tree",
+                VEGE_KEY:    "vegetable garden",
+                EIGHTYA_KEY: "80A section" }
+
+
+# Thresholds - 
+MOISTURE_EMAIL_THRESHOLDS = { 
+                LEMON_KEY:   700,
+                VEGE_KEY:    700,
+                EIGHTYA_KEY: 200 }
+
+# Email addresses to be used for each moisture sensor:
+MOISTURE_EMAIL_ADDRESSES = { 
+                LEMON_KEY:LEMON_ADDRESS,
+                VEGE_KEY:VEGE_ADDRESS,
+                EIGHTYA_KEY:EIGHTYA_ADDRESS}
+
+# if the pickled file with email dates exists then read it now:
+if os.path.exists(LAST_EMAIL_DATA_FILE):
+    last_emails = pickle.load(open(LAST_EMAIL_DATA_FILE, "rb"))
+
 
 
 
@@ -256,7 +304,7 @@ From: %s
 To: %s
 Subject: %s
 
-Trap triggeed: %s
+Trap triggered: %s
 """ % (sent_from, to, subject, station)
 
     try:
@@ -303,6 +351,18 @@ def insert_soil_moisture_data( post_args ):
     cnx.commit()
     cursor.close()
     cnx.close()
+
+    if not has_temperature:
+        # only for moisture data:
+        if int(moisture) < MOISTURE_EMAIL_THRESHOLDS[station]:
+            send_moisture_email( MOISTURE_EMAIL_ADDRESSES[station], 
+                            MOISTURE_EMAIL_NAMES[station],  
+                            MOISTURE_EMAIL_THRESHOLDS[station],  
+                            int(moisture), station )
+        
+
+
+
 
 def insert_lorat_data( post_args ):
     """
@@ -438,7 +498,58 @@ def last_day_data( field ) :
     cnx.close()
     return (dates,data)
 
- 
+
+def send_moisture_email( address, station, threshold, value, key ):
+    """
+    Send email to notify that the soil moisture level has
+    fallen below the threshold.
+    """
+
+
+    sent_from = GMAIL_USER
+    to = address
+    subject = 'Soil moisture warning - {}'.format( station )
+
+    email_text = """\
+From: {}
+To: {}
+Subject: {}
+
+The moisture level for the {} has fallen to {:d} which is below the
+threshold of {:d}. 
+
+Please water this area soon!
+
+
+""" .format(sent_from, to, subject, station, value, threshold )
+
+
+    # Check the date and only send email if we haven't today:
+    today = datetime.date.today()
+    if last_emails[key] == today:
+        print("Nothing to do")
+        return
+
+
+    try:
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.ehlo()
+        server.login(GMAIL_USER, GMAIL_PASSWORD)
+        server.sendmail(sent_from, to, email_text)
+        server.close()
+
+        print( 'Email sent!')
+        # Save the current date as that in which an email was sent so we
+        # don't send another email today even if we are under the threshold.
+        last_emails[key] = today
+        pickle.dump(last_emails, open(LAST_EMAIL_DATA_FILE, "wb"))
+
+
+    except:
+        print( 'Something went wrong...')
+
+
+
 
 def main():
       opts = getopts()
