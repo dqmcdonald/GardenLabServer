@@ -31,14 +31,22 @@ GMAIL_USER=pd[0].strip()
 GMAIL_PASSWORD=pd[1].strip()
 
 LAST_EMAIL_DATA_FILE = '/home/pi/GardenLabServer/last_email.data'
+LAST_UPDATE_DATA_FILE = '/home/pi/GardenLabServer/last_update.data'
 
 LEMON_ADDRESS = ['dqmcdonald@gmail.com','beatrice.cheer@gmail.com']
 VEGE_ADDRESS = ['dqmcdonald@gmail.com' ]
 EIGHTYA_ADDRESS = ['dqmcdonald@gmail.com' ]
 
+NO_UPDATE_ADDRESS = ['dqmcdonald@gmail.com' ]
+
 VEGE_KEY =    'MOIS01'
 LEMON_KEY =   'MOIS02'
 EIGHTYA_KEY = 'MOIS03'
+
+# Time threshold in seconds
+TIME_THRESHOLD = 60*60*3  # 3 hours
+
+
 
 # arbitrary default date for starting point, only needs to be some time
 # in the past.
@@ -50,6 +58,11 @@ last_emails = { LEMON_KEY:default_date,
                 VEGE_KEY:default_date,
                 EIGHTYA_KEY:default_date }
 
+default_datetime = datetime.datetime(2021,9,6,20,21,0)
+last_updates = { LEMON_KEY:default_datetime,
+                VEGE_KEY:default_datetime,
+                EIGHTYA_KEY:default_datetime }
+
 
 # Descriptive names used to send email:
 MOISTURE_EMAIL_NAMES = { 
@@ -60,8 +73,8 @@ MOISTURE_EMAIL_NAMES = {
 
 # Thresholds - 
 MOISTURE_EMAIL_THRESHOLDS = { 
-                LEMON_KEY:   700,
-                VEGE_KEY:    700,
+                LEMON_KEY:   780,
+                VEGE_KEY:    780,
                 EIGHTYA_KEY: 200 }
 
 # Email addresses to be used for each moisture sensor:
@@ -74,7 +87,9 @@ MOISTURE_EMAIL_ADDRESSES = {
 if os.path.exists(LAST_EMAIL_DATA_FILE):
     last_emails = pickle.load(open(LAST_EMAIL_DATA_FILE, "rb"))
 
-
+# read the last updates if appropriate:
+if os.path.exists(LAST_UPDATE_DATA_FILE):
+    last_updates = pickle.load(open(LAST_UPDATE_DATA_FILE, "rb"))
 
 
 # Data table Schema:
@@ -360,7 +375,9 @@ def insert_soil_moisture_data( post_args ):
                             MOISTURE_EMAIL_THRESHOLDS[station],  
                             int(moisture), station )
         
-
+        # Update the datetime when new data is inserted into the database
+        last_updates[station] = datetime.datetime.now()
+        pickle.dump(last_updates, open(LAST_UPDATE_DATA_FILE, "wb"))
 
 
 
@@ -426,7 +443,15 @@ def insert_data_from_dict( post_args ):
     else:
         insert_gardenlab_data( post_args )
 
-
+    # Check the updates for the moisture sensors and see if there
+    # has been an updated within the time threshold:
+    now = datetime.datetime.now()
+    for key in last_updates:
+        delta = now - last_updates[key] 
+        if delta.seconds > TIME_THRESHOLD:
+            send_no_update_email(NO_UPDATE_ADDRESS , key)
+            
+    
 
 
 def count_records():
@@ -522,6 +547,55 @@ Please water this area soon!
 
 
 """ .format(sent_from, to, subject, station, value, threshold )
+
+
+    # Check the date and only send email if we haven't today:
+    today = datetime.date.today()
+    if last_emails[key] == today:
+        print("Nothing to do")
+        return
+
+
+    try:
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.ehlo()
+        server.login(GMAIL_USER, GMAIL_PASSWORD)
+        server.sendmail(sent_from, to, email_text)
+        server.close()
+
+        print( 'Email sent!')
+        # Save the current date as that in which an email was sent so we
+        # don't send another email today even if we are under the threshold.
+        last_emails[key] = today
+        pickle.dump(last_emails, open(LAST_EMAIL_DATA_FILE, "wb"))
+
+
+    except:
+        print( 'Something went wrong...')
+
+
+def send_no_update_email( address, key):
+    """
+    Send email to notify that no update has been 
+    made for some time.
+    """
+
+    station =  MOISTURE_EMAIL_NAMES[key]
+
+    sent_from = GMAIL_USER
+    to = address
+    subject = 'Data update warning- {}'.format( station )
+
+    email_text = """\
+From: {}
+To: {}
+Subject: {}
+
+No data has been received from {} for some time. Please check the battery
+or the receiver. 
+
+
+""" .format(sent_from, to, subject, station )
 
 
     # Check the date and only send email if we haven't today:

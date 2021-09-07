@@ -19,7 +19,7 @@ import datetime
 cgitb.enable()
 
 STANDARD_SAMPLING_RATE = 18.7667
-BASE_DIR = "/home/pi/jamaseisData/CASH/"
+BASE_DIR = "/mnt/ssd/pi/jamaseisData/CASH/"
 
 def get_file_names( date ):
 
