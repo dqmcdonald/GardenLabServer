@@ -13,6 +13,7 @@ fields = ["id", "ts", "temperature", "humidity", "pressure", "battery_voltage",
           "panel_current", "wind_speed", "rainfall", "wind_direction"]
 
 vege_moisture_fields = ["moisture"]
+sky_temperature_fields = ["sky_temperature"]
 vege_temperature_fields = ["soil_temperature"]
 lemon_moisture_fields = ["moisture"]
 eightyA_moisture_fields = ["moisture"]
@@ -133,6 +134,22 @@ def vege_temperature_query_db( cnx, query, cd, prefix = "" ):
 
     cursor.close()
 
+def sky_temperature_query_db( cnx, query, cd, prefix = "" ):
+    """
+    Perform a query of the database and update dictionary "cd" with the
+    results for the sky temp sensor
+    """
+
+    cursor = cnx.cursor()
+    cursor.execute(query)
+
+    for( sky_temperature ) in cursor:
+        if sky_temperature[0] is not None:
+            cd[prefix+"sky_temperature"] = "{:3.1f}".format(
+                sky_temperature[0])
+
+    cursor.close()
+
 
 env = Environment(
    loader=FileSystemLoader('/home/pi/GardenLabServer/cgi')
@@ -145,6 +162,7 @@ print("")
 DATABASE_NAME="GardenLab"
 TABLE_NAME="GardenLabData"
 SM_TABLE_NAME="SoilMoistureData"
+SKY_TABLE_NAME="SkyTemperatureData"
 
 DAY_COND = " where ts > DATE_SUB( NOW(), INTERVAL 1 DAY )"
 WEEK_COND = " where ts > DATE_SUB( NOW(), INTERVAL 1 WEEK )"
@@ -190,6 +208,10 @@ vege_latest_query = build_query( vege_temperature_fields, SM_TABLE_NAME,
  " WHERE station='MOIS01' AND has_temperature=1 ORDER BY id DESC LIMIT 1")
 vege_temperature_query_db(cnx, vege_latest_query, context_dict)
 
+sky_latest_query = build_query( sky_temperature_fields, SKY_TABLE_NAME, 
+ " ORDER BY id DESC LIMIT 1")
+sky_temperature_query_db(cnx, sky_latest_query, context_dict)
+
 lemon_latest_query = build_query( lemon_moisture_fields, SM_TABLE_NAME, 
  " WHERE station='MOIS02' AND has_temperature=0 ORDER BY id DESC LIMIT 1")
 lemon_moisture_query_db(cnx, lemon_latest_query, context_dict)
@@ -220,9 +242,12 @@ for (plab,period) in PERIODS:
         lemon_moisture_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
 
         condition = "{} {}".format(period, "AND station='MOIS03' AND has_temperature=0")
-        query = build_query(lemon_moisture_fields, SM_TABLE_NAME, condition,func)
         query = build_query(eightyA_moisture_fields, SM_TABLE_NAME, condition,func)
         eightyA_moisture_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
+        condition = " "
+        query = build_query(sky_temperature_fields, SKY_TABLE_NAME, 
+            condition,func)
+        sky_temperature_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
 
 
 cnx.close()

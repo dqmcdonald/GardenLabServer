@@ -16,6 +16,7 @@ DATABASE_NAME="GardenLab"
 TABLE_NAME="GardenLabData"
 SM_TABLE_NAME="SoilMoistureData"
 LR_TABLE_NAME="LoRatData"
+ST_TABLE_NAME="SkyTemperatureData"
 
 # Read the password and username from an external file:
 
@@ -121,6 +122,15 @@ DATA_TABLE_DEF[SM_TABLE_NAME] = ("CREATE TABLE `{0}` ("
                               " `station` char(6) NOT NULL, "
                               " PRIMARY KEY (`id`) )".format(SM_TABLE_NAME) )
 
+DATA_TABLE_DEF[ST_TABLE_NAME] = ("CREATE TABLE `{0}` ("
+                              " `id` int(11) NOT NULL AUTO_INCREMENT,"
+                              " `ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+                              " `dt` DATE  NOT NULL,"
+                              " `sky_temperature` float not NULL, "
+                              " `station` char(6) NOT NULL, "
+                              " PRIMARY KEY (`id`) )".format(ST_TABLE_NAME) )
+
+
 DATA_TABLE_DEF[LR_TABLE_NAME] = ("CREATE TABLE `{0}` ("
                               " `id` int(11) NOT NULL AUTO_INCREMENT,"
                               " `ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
@@ -138,6 +148,10 @@ INSERT_DEF = ("INSERT into GardenLabData "
 SM_INSERT_DEF = ("INSERT into SoilMoistureData "
               "(dt, moisture, soil_temperature, has_temperature, station ) "
               "VALUES (%s, %s, %s, %s, %s )")
+
+ST_INSERT_DEF = ("INSERT into SkyTemperatureData "
+              "(dt, sky_temperature, station ) "
+              "VALUES (%s, %s, %s )")
 
 LR_INSERT_DEF = ("INSERT into LoRatData "
               "(dt, station ) "
@@ -162,6 +176,7 @@ PANEL_CURRENT_KEY = 'PCUR'
 SOIL_TEMPERATURE_KEY = 'SOILTEMP'
 STATION_KEY = 'STATION'
 MOISTURE_KEY = 'MOISTURE'
+SKY_TEMPERATURE_KEY = 'SKYTEMP'
 LORAT_KEY = 'LORAT'
 
 
@@ -184,6 +199,10 @@ def getopts():
     parser.add_argument('-r','--lr_create',
                         action='store_true',
                         help='Create LoRat database')
+
+    parser.add_argument('-k','--st_create',
+                        action='store_true',
+                        help='Create Sky Temp database')
 
     parser.add_argument('-l','--list',
                         action='store_true',
@@ -231,6 +250,23 @@ def create_sm_table():
     print("Creating data with SQL expression")
     print(DATA_TABLE_DEF[SM_TABLE_NAME])
     cursor.execute(DATA_TABLE_DEF[SM_TABLE_NAME])
+    cnx.close()
+
+def create_st_table():
+    """
+    Create the sky tempertuare database table and define the fields
+    """
+    cnx = open_database()
+    
+    cursor = cnx.cursor()
+    print("Deleting table")
+    try:
+        cursor.execute("DROP TABLE `{0}`".format(ST_TABLE_NAME))
+    except:
+        pass
+    print("Creating data with SQL expression")
+    print(DATA_TABLE_DEF[ST_TABLE_NAME])
+    cursor.execute(DATA_TABLE_DEF[ST_TABLE_NAME])
     cnx.close()
 
 def create_lr_table():
@@ -333,6 +369,26 @@ Trap triggered: %s
     except:
         print( 'Something went wrong...')
 
+
+def insert_sky_temperature_data( post_args ):
+    """
+    Insert values into SkyTemperature DB table from the args dictionary
+    """
+    sky_temperature = 0.0
+    sky_temperature = float(post_args[SKY_TEMPERATURE_KEY][0])
+    sky_temperature = sky_temperature/1000.0  # Was stored as integer
+
+    station = (post_args[STATION_KEY][0]).decode("utf-8") 
+
+    cnx = mysql.connector.connect(user=USER_NAME, password=PASSWD,
+                                 database=DATABASE_NAME )
+    
+    cursor = cnx.cursor()
+    cursor.execute(ST_INSERT_DEF,(time.strftime("%Y-%m-%d"),
+       sky_temperature, station ))
+    cnx.commit()
+    cursor.close()
+    cnx.close()
 
 
 
@@ -438,6 +494,8 @@ def insert_data_from_dict( post_args ):
 
     if MOISTURE_KEY in post_args or SOIL_TEMPERATURE_KEY in post_args:
         insert_soil_moisture_data( post_args )
+    elif SKY_TEMPERATURE_KEY in post_args:
+        insert_sky_temperature_data( post_args )
     elif LORAT_KEY in post_args:
         insert_lorat_data( post_args )
     else:
@@ -510,6 +568,8 @@ def last_day_data( field ) :
           query = ("SELECT ts,moisture FROM SoilMoistureData WHERE ts > DATE_SUB( NOW(),  INTERVAL 24 HOUR) and has_temperature = 0 and station = 'MOIS02'" )
     elif field == '80A_moisture':
           query = ("SELECT ts,moisture FROM SoilMoistureData WHERE ts > DATE_SUB( NOW(),  INTERVAL 24 HOUR) and has_temperature = 0 and station = 'MOIS03'" )
+    elif field == 'sky_temperature':
+          query = ("SELECT ts,sky_temperature FROM SkyTemperatureData WHERE ts > DATE_SUB( NOW(),  INTERVAL 24 HOUR)" )
     else:
           query = LATEST_QUERY_SQL.format(field)
  
@@ -635,6 +695,8 @@ def main():
           test_data()
       if opts.sm_create:
           create_sm_table()
+      if opts.st_create:
+          create_st_table()
       if opts.lr_create:
           create_lr_table()
           

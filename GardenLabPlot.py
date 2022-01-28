@@ -47,7 +47,8 @@ plot_defs = {
      "80A_moisture": PlotStyle("#300030", ymin=0,ymax=1024),
      "vege_moisture": PlotStyle("#d020d0", ymin=0,ymax=1024),
      "vege_temperature": PlotStyle("#0200d0",ymin=0,ymax=25.0 ),
-     "lemon_moisture": PlotStyle("#e0e330", ymin=0,ymax=1024) }
+     "lemon_moisture": PlotStyle("#e0e330", ymin=0,ymax=1024),
+     "sky_temperature": PlotStyle("#22ddff", ymin=-20,ymax=20) }
 
 
 
