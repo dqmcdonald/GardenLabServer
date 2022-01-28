@@ -37,12 +37,14 @@ LAST_UPDATE_DATA_FILE = '/home/pi/GardenLabServer/last_update.data'
 LEMON_ADDRESS = ['dqmcdonald@gmail.com','beatrice.cheer@gmail.com']
 VEGE_ADDRESS = ['dqmcdonald@gmail.com' ]
 EIGHTYA_ADDRESS = ['dqmcdonald@gmail.com' ]
+SKYTEMP_ADDRESS = ['dqmcdonald@gmail.com' ]
 
 NO_UPDATE_ADDRESS = ['dqmcdonald@gmail.com' ]
 
 VEGE_KEY =    'MOIS01'
 LEMON_KEY =   'MOIS02'
 EIGHTYA_KEY = 'MOIS03'
+SKYTEMP_KEY = 'SKYTMP'
 
 # Time threshold in seconds
 TIME_THRESHOLD = 60*60*3  # 3 hours
@@ -51,25 +53,28 @@ TIME_THRESHOLD = 60*60*3  # 3 hours
 
 # arbitrary default date for starting point, only needs to be some time
 # in the past.
-default_date = datetime.date(2020,9,1)
+default_date = datetime.date(2020,1,27)
 
 # Stores the date when the last email was sent. Pickled to a file and used
 # to only send a single email per-day
 last_emails = { LEMON_KEY:default_date,
                 VEGE_KEY:default_date,
-                EIGHTYA_KEY:default_date }
+                EIGHTYA_KEY:default_date,
+                SKYTEMP_KEY:default_date }
 
-default_datetime = datetime.datetime(2021,9,6,20,21,0)
+default_datetime = datetime.datetime(2022,1,27,9,21,0)
 last_updates = { LEMON_KEY:default_datetime,
                 VEGE_KEY:default_datetime,
-                EIGHTYA_KEY:default_datetime }
+                EIGHTYA_KEY:default_datetime,
+                SKYTEMP_KEY:default_datetime }
 
 
 # Descriptive names used to send email:
 MOISTURE_EMAIL_NAMES = { 
                 LEMON_KEY:   "lemon tree",
                 VEGE_KEY:    "vegetable garden",
-                EIGHTYA_KEY: "80A section" }
+                EIGHTYA_KEY: "80A section" ,
+                SKYTEMP_KEY: "Sky Temperature sensor" }
 
 
 # Thresholds - 
@@ -82,7 +87,8 @@ MOISTURE_EMAIL_THRESHOLDS = {
 MOISTURE_EMAIL_ADDRESSES = { 
                 LEMON_KEY:LEMON_ADDRESS,
                 VEGE_KEY:VEGE_ADDRESS,
-                EIGHTYA_KEY:EIGHTYA_ADDRESS}
+                EIGHTYA_KEY:EIGHTYA_ADDRESS,
+                SKYTEMP_KEY:SKYTEMP_ADDRESS}
 
 # if the pickled file with email dates exists then read it now:
 if os.path.exists(LAST_EMAIL_DATA_FILE):
