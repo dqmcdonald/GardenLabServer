@@ -396,6 +396,9 @@ def insert_sky_temperature_data( post_args ):
     cursor.close()
     cnx.close()
 
+    # Update the datetime when new data is inserted into the database
+    last_updates[station] = datetime.datetime.now()
+    pickle.dump(last_updates, open(LAST_UPDATE_DATA_FILE, "wb"))
 
 
 
