@@ -16,7 +16,6 @@ vege_moisture_fields = ["moisture"]
 sky_temperature_fields = ["sky_temperature"]
 vege_temperature_fields = ["soil_temperature"]
 lemon_moisture_fields = ["moisture"]
-eightyA_moisture_fields = ["moisture"]
 
 def build_query( fields, table, condition, func=None):
     """
@@ -98,22 +97,6 @@ def lemon_moisture_query_db( cnx, query, cd, prefix = "" ):
     for( moisture ) in cursor:
         if moisture[0] is not  None:
             cd[prefix+"lemon_moisture"] = "{:3.0f}".format(moisture[0])
-
-    cursor.close()
-
-
-def eightyA_moisture_query_db( cnx, query, cd, prefix = "" ):
-    """
-    Perform a query of the database and update dictionary "cd" with the
-    results for eightyA moisture
-    """
-
-    cursor = cnx.cursor()
-    cursor.execute(query)
-
-    for( moisture ) in cursor:
-        if moisture[0] is not  None:
-            cd[prefix+"eightyA_moisture"] = "{:3.0f}".format(moisture[0])
 
     cursor.close()
 
@@ -216,10 +199,6 @@ lemon_latest_query = build_query( lemon_moisture_fields, SM_TABLE_NAME,
  " WHERE station='MOIS02' AND has_temperature=0 ORDER BY id DESC LIMIT 1")
 lemon_moisture_query_db(cnx, lemon_latest_query, context_dict)
 
-eightyA_latest_query = build_query( eightyA_moisture_fields, SM_TABLE_NAME, 
- " WHERE station='MOIS03' AND has_temperature=0 ORDER BY id DESC LIMIT 1")
-eightyA_moisture_query_db(cnx, eightyA_latest_query, context_dict)
-
 
 # Get the min, max and average for the last 24 hours:
 
@@ -241,10 +220,7 @@ for (plab,period) in PERIODS:
         query = build_query(lemon_moisture_fields, SM_TABLE_NAME, condition,func)
         lemon_moisture_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
 
-        condition = "{} {}".format(period, "AND station='MOIS03' AND has_temperature=0")
-        query = build_query(eightyA_moisture_fields, SM_TABLE_NAME, condition,func)
-        eightyA_moisture_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
-        condition = " "
+        condition = "{}".format(period)
         query = build_query(sky_temperature_fields, SKY_TABLE_NAME, 
             condition,func)
         sky_temperature_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))

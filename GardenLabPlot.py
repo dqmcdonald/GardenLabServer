@@ -44,11 +44,10 @@ plot_defs = {
     "panel_current" : PlotStyle("#00f000", ymin=0, ymax=4.0),
     "rainfall": PlotStyle("#5a2729",PlotType.HOURLY_BAR),
      "wind_direction": PlotStyle("#ffd700",PlotType.POLAR_PLOT),
-     "80A_moisture": PlotStyle("#300030", ymin=0,ymax=1024),
-     "vege_moisture": PlotStyle("#d020d0", ymin=0,ymax=1024),
+     "vege_moisture": PlotStyle("#d020d0", ymin=700,ymax=900),
      "vege_temperature": PlotStyle("#0200d0",ymin=0,ymax=25.0 ),
-     "lemon_moisture": PlotStyle("#e0e330", ymin=0,ymax=1024),
-     "sky_temperature": PlotStyle("#22ddff", ymin=-20,ymax=20) }
+     "lemon_moisture": PlotStyle("#e0e330", ymin=700,ymax=900),
+     "sky_temperature": PlotStyle("#22ddff", ymin=-30,ymax=30)}
 
 
 

@@ -73,21 +73,18 @@ last_updates = { LEMON_KEY:default_datetime,
 MOISTURE_EMAIL_NAMES = { 
                 LEMON_KEY:   "lemon tree",
                 VEGE_KEY:    "vegetable garden",
-                EIGHTYA_KEY: "80A section" ,
                 SKYTEMP_KEY: "Sky Temperature sensor" }
 
 
 # Thresholds - 
 MOISTURE_EMAIL_THRESHOLDS = { 
-                LEMON_KEY:   780,
-                VEGE_KEY:    780,
-                EIGHTYA_KEY: 200 }
+                LEMON_KEY:   750,
+                VEGE_KEY:    780 };
 
 # Email addresses to be used for each moisture sensor:
 MOISTURE_EMAIL_ADDRESSES = { 
                 LEMON_KEY:LEMON_ADDRESS,
                 VEGE_KEY:VEGE_ADDRESS,
-                EIGHTYA_KEY:EIGHTYA_ADDRESS,
                 SKYTEMP_KEY:SKYTEMP_ADDRESS}
 
 # if the pickled file with email dates exists then read it now:
@@ -575,8 +572,6 @@ def last_day_data( field ) :
           query = ("SELECT ts,soil_temperature FROM SoilMoistureData WHERE ts > DATE_SUB( NOW(),  INTERVAL 24 HOUR) and has_temperature = 1 and station = 'MOIS01'" )
     elif field == 'lemon_moisture':
           query = ("SELECT ts,moisture FROM SoilMoistureData WHERE ts > DATE_SUB( NOW(),  INTERVAL 24 HOUR) and has_temperature = 0 and station = 'MOIS02'" )
-    elif field == '80A_moisture':
-          query = ("SELECT ts,moisture FROM SoilMoistureData WHERE ts > DATE_SUB( NOW(),  INTERVAL 24 HOUR) and has_temperature = 0 and station = 'MOIS03'" )
     elif field == 'sky_temperature':
           query = ("SELECT ts,sky_temperature FROM SkyTemperatureData WHERE ts > DATE_SUB( NOW(),  INTERVAL 24 HOUR)" )
     else:
