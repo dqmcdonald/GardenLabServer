@@ -36,14 +36,14 @@ class PlotStyle(object):
 
 
 plot_defs = {
-    "temperature" : PlotStyle("#05d005",ymin=0.0,ymax=40.),
-    "humidity" : PlotStyle("#d05050",ymin=0,ymax=100.0),
-    "pressure" : PlotStyle("#0505d0",ymin=940,ymax=1040),
-    "battery_voltage" : PlotStyle("#a0a075",ymin=11, ymax=15.0),
-    "wind_speed" : PlotStyle("#d0d0d0", ymin=0,ymax=15.0) ,
-    "panel_current" : PlotStyle("#00f000", ymin=0, ymax=4.0),
-    "rainfall": PlotStyle("#5a2729",PlotType.HOURLY_BAR),
-     "wind_direction": PlotStyle("#ffd700",PlotType.POLAR_PLOT),
+ #   "temperature" : PlotStyle("#05d005",ymin=0.0,ymax=40.),
+ #   "humidity" : PlotStyle("#d05050",ymin=0,ymax=100.0),
+ #   "pressure" : PlotStyle("#0505d0",ymin=940,ymax=1040),
+ #   "battery_voltage" : PlotStyle("#a0a075",ymin=11, ymax=15.0),
+ #   "wind_speed" : PlotStyle("#d0d0d0", ymin=0,ymax=15.0) ,
+ #   "panel_current" : PlotStyle("#00f000", ymin=0, ymax=4.0),
+ #   "rainfall": PlotStyle("#5a2729",PlotType.HOURLY_BAR),
+ #    "wind_direction": PlotStyle("#ffd700",PlotType.POLAR_PLOT),
      "vege_moisture": PlotStyle("#d020d0", ymin=700,ymax=900),
      "vege_temperature": PlotStyle("#0200d0",ymin=0,ymax=25.0 ),
      "lemon_moisture": PlotStyle("#e0e330", ymin=700,ymax=900),

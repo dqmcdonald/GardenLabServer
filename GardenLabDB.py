@@ -36,14 +36,12 @@ LAST_UPDATE_DATA_FILE = '/home/pi/GardenLabServer/last_update.data'
 
 LEMON_ADDRESS = ['dqmcdonald@gmail.com','beatrice.cheer@gmail.com']
 VEGE_ADDRESS = ['dqmcdonald@gmail.com' ]
-EIGHTYA_ADDRESS = ['dqmcdonald@gmail.com' ]
 SKYTEMP_ADDRESS = ['dqmcdonald@gmail.com' ]
 
 NO_UPDATE_ADDRESS = ['dqmcdonald@gmail.com' ]
 
 VEGE_KEY =    'MOIS01'
 LEMON_KEY =   'MOIS02'
-EIGHTYA_KEY = 'MOIS03'
 SKYTEMP_KEY = 'SKYTMP'
 
 # Time threshold in seconds
@@ -59,21 +57,17 @@ default_date = datetime.date(2020,1,27)
 # to only send a single email per-day
 last_emails = { LEMON_KEY:default_date,
                 VEGE_KEY:default_date,
-                EIGHTYA_KEY:default_date,
                 SKYTEMP_KEY:default_date }
 
 default_datetime = datetime.datetime(2022,1,27,9,21,0)
 last_updates = { LEMON_KEY:default_datetime,
-                VEGE_KEY:default_datetime,
-                EIGHTYA_KEY:default_datetime,
-                SKYTEMP_KEY:default_datetime }
+                VEGE_KEY:default_datetime}
 
 
 # Descriptive names used to send email:
 MOISTURE_EMAIL_NAMES = { 
                 LEMON_KEY:   "lemon tree",
-                VEGE_KEY:    "vegetable garden",
-                SKYTEMP_KEY: "Sky Temperature sensor" }
+                VEGE_KEY:    "vegetable garden"}
 
 
 # Thresholds - 
@@ -84,8 +78,7 @@ MOISTURE_EMAIL_THRESHOLDS = {
 # Email addresses to be used for each moisture sensor:
 MOISTURE_EMAIL_ADDRESSES = { 
                 LEMON_KEY:LEMON_ADDRESS,
-                VEGE_KEY:VEGE_ADDRESS,
-                SKYTEMP_KEY:SKYTEMP_ADDRESS}
+                VEGE_KEY:VEGE_ADDRESS}
 
 # if the pickled file with email dates exists then read it now:
 if os.path.exists(LAST_EMAIL_DATA_FILE):
