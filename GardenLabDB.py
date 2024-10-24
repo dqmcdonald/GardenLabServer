@@ -36,13 +36,15 @@ LAST_UPDATE_DATA_FILE = '/home/pi/GardenLabServer/last_update.data'
 
 LEMON_ADDRESS = ['dqmcdonald@gmail.com','beatrice.cheer@gmail.com']
 VEGE_ADDRESS = ['dqmcdonald@gmail.com' ]
-SKYTEMP_ADDRESS = ['dqmcdonald@gmail.com' ]
 
 NO_UPDATE_ADDRESS = ['dqmcdonald@gmail.com' ]
 
 VEGE_KEY =    'MOIS01'
 LEMON_KEY =   'MOIS02'
-SKYTEMP_KEY = 'SKYTMP'
+
+low_value_counts = { VEGE_KEY:0, LEMON_KEY:0}
+MAX_LOW_COUNTS = 3  # Send email after three values below the threshold
+
 
 # Time threshold in seconds
 TIME_THRESHOLD = 60*60*3  # 3 hours
@@ -56,8 +58,7 @@ default_date = datetime.date(2020,1,27)
 # Stores the date when the last email was sent. Pickled to a file and used
 # to only send a single email per-day
 last_emails = { LEMON_KEY:default_date,
-                VEGE_KEY:default_date,
-                SKYTEMP_KEY:default_date }
+                VEGE_KEY:default_date}
 
 default_datetime = datetime.datetime(2022,1,27,9,21,0)
 last_updates = { LEMON_KEY:default_datetime,
@@ -172,7 +173,6 @@ PANEL_CURRENT_KEY = 'PCUR'
 SOIL_TEMPERATURE_KEY = 'SOILTEMP'
 STATION_KEY = 'STATION'
 MOISTURE_KEY = 'MOISTURE'
-SKY_TEMPERATURE_KEY = 'SKYTEMP'
 LORAT_KEY = 'LORAT'
 
 
@@ -366,32 +366,6 @@ Trap triggered: %s
         print( 'Something went wrong...')
 
 
-def insert_sky_temperature_data( post_args ):
-    """
-    Insert values into SkyTemperature DB table from the args dictionary
-    """
-    sky_temperature = 0.0
-    sky_temperature = float(post_args[SKY_TEMPERATURE_KEY][0])
-    sky_temperature = sky_temperature/1000.0  # Was stored as integer
-
-    station = (post_args[STATION_KEY][0]).decode("utf-8") 
-
-    cnx = mysql.connector.connect(user=USER_NAME, password=PASSWD,
-                                 database=DATABASE_NAME )
-    
-    cursor = cnx.cursor()
-    cursor.execute(ST_INSERT_DEF,(time.strftime("%Y-%m-%d"),
-       sky_temperature, station ))
-    cnx.commit()
-    cursor.close()
-    cnx.close()
-
-    # Update the datetime when new data is inserted into the database
-    last_updates[station] = datetime.datetime.now()
-    pickle.dump(last_updates, open(LAST_UPDATE_DATA_FILE, "wb"))
-
-
-
 def insert_soil_moisture_data( post_args ):
     """
     Insert values into SoilMoisture DB table from the args dictionary
@@ -425,7 +399,12 @@ def insert_soil_moisture_data( post_args ):
     if not has_temperature:
         # only for moisture data:
         if int(moisture) < MOISTURE_EMAIL_THRESHOLDS[station]:
-            send_moisture_email( MOISTURE_EMAIL_ADDRESSES[station], 
+            # Update the low value counts for this station. If greater then
+            # max then send Email
+            low_value_counts[station] +=  1
+            if low_value_counts[station] > MAX_LOW_COUNTS:
+                low_value_counts[station] = 0
+                send_moisture_email( MOISTURE_EMAIL_ADDRESSES[station], 
                             MOISTURE_EMAIL_NAMES[station],  
                             MOISTURE_EMAIL_THRESHOLDS[station],  
                             int(moisture), station )
@@ -493,8 +472,6 @@ def insert_data_from_dict( post_args ):
 
     if MOISTURE_KEY in post_args or SOIL_TEMPERATURE_KEY in post_args:
         insert_soil_moisture_data( post_args )
-    elif SKY_TEMPERATURE_KEY in post_args:
-        insert_sky_temperature_data( post_args )
     elif LORAT_KEY in post_args:
         insert_lorat_data( post_args )
     else:
@@ -565,8 +542,6 @@ def last_day_data( field ) :
           query = ("SELECT ts,soil_temperature FROM SoilMoistureData WHERE ts > DATE_SUB( NOW(),  INTERVAL 24 HOUR) and has_temperature = 1 and station = 'MOIS01'" )
     elif field == 'lemon_moisture':
           query = ("SELECT ts,moisture FROM SoilMoistureData WHERE ts > DATE_SUB( NOW(),  INTERVAL 24 HOUR) and has_temperature = 0 and station = 'MOIS02'" )
-    elif field == 'sky_temperature':
-          query = ("SELECT ts,sky_temperature FROM SkyTemperatureData WHERE ts > DATE_SUB( NOW(),  INTERVAL 24 HOUR)" )
     else:
           query = LATEST_QUERY_SQL.format(field)
  
@@ -586,6 +561,9 @@ def send_moisture_email( address, station, threshold, value, key ):
     Send email to notify that the soil moisture level has
     fallen below the threshold.
     """
+
+    # Temporary - remove with fixed
+    return
 
 
     sent_from = GMAIL_USER
@@ -636,6 +614,10 @@ def send_no_update_email( address, key):
     Send email to notify that no update has been 
     made for some time.
     """
+
+    # Temporary - remove when fixed
+    return
+
 
     station =  MOISTURE_EMAIL_NAMES[key]
 

@@ -8,14 +8,8 @@ import cgitb
 cgitb.enable()
 
 
-
-fields = ["id", "ts", "temperature", "humidity", "pressure", "battery_voltage",
-          "panel_current", "wind_speed", "rainfall", "wind_direction"]
-
-vege_moisture_fields = ["moisture"]
-sky_temperature_fields = ["sky_temperature"]
-vege_temperature_fields = ["soil_temperature"]
-lemon_moisture_fields = ["moisture"]
+vege_moisture_fields = ["ts","moisture"]
+lemon_moisture_fields = ["ts","moisture"]
 
 def build_query( fields, table, condition, func=None):
     """
@@ -36,40 +30,6 @@ def build_query( fields, table, condition, func=None):
     
 
 
-def query_db( cnx, query, cd, prefix = "" ):
-    """
-    Perform a query of the database and update dictionary "cd" with the
-    results
-    """
-
-    cursor = cnx.cursor()
-    cursor.execute(query)
-
-    for( id, ts, tmp,h,p, v, pc, ws, rf, wd ) in cursor:
-        if prefix == "":
-            cd["time_stamp"]=ts.strftime("%H:%M:%S  %d %B %Y")
-        else:
-            cd[prefix+"time_stamp"] = ts
-        if tmp is not None:
-            cd[prefix+"temperature"] = "%3.1f"%tmp
-        if h is not None:
-            cd[prefix+"humidity"]="%3.1f"%h
-        if p is not None:
-            cd[prefix+"pressure"]=int(p)
-        if v is not None:
-            cd[prefix+"battery_voltage"] = "%5.2f"%v
-        if pc is not None:
-            cd[prefix+"panel_current"] = "%5.3f"%pc
-        if ws is not None:
-            cd[prefix+"wind_speed"] = "%3.1f"%ws
-        if rf is not None:
-            cd[prefix+"rainfall"]= "%3.1f"%rf
-        if wd is not None:
-            cd[prefix+"wind_direction"] = wd
-
-    cursor.close()
-
-
 def vege_moisture_query_db( cnx, query, cd, prefix = "" ):
     """
     Perform a query of the database and update dictionary "cd" with the
@@ -79,9 +39,14 @@ def vege_moisture_query_db( cnx, query, cd, prefix = "" ):
     cursor = cnx.cursor()
     cursor.execute(query)
 
-    for( moisture ) in cursor:
-        if moisture[0] is not None:
-            cd[prefix+"vege_moisture"] = "{:3.0f}".format(moisture[0])
+    for( ts, moisture ) in cursor:
+        if moisture is not None:
+            cd[prefix+"vege_moisture"] = "{:3.0f}".format(moisture)
+        if prefix == "":
+            cd["vege_time_stamp"]=ts.strftime("%H:%M:%S  %d %B %Y")
+        else:
+            cd[prefix+"vege_time_stamp"] = ts
+        
 
     cursor.close()
 
@@ -94,9 +59,14 @@ def lemon_moisture_query_db( cnx, query, cd, prefix = "" ):
     cursor = cnx.cursor()
     cursor.execute(query)
 
-    for( moisture ) in cursor:
-        if moisture[0] is not  None:
-            cd[prefix+"lemon_moisture"] = "{:3.0f}".format(moisture[0])
+    for( ts, moisture ) in cursor:
+        if moisture is not  None:
+            cd[prefix+"lemon_moisture"] = "{:3.0f}".format(moisture)
+        if prefix == "":
+            cd["lemon_time_stamp"]=ts.strftime("%H:%M:%S  %d %B %Y")
+        else:
+            cd[prefix+"lemon_time_stamp"] = ts
+        
 
     cursor.close()
 
@@ -117,22 +87,6 @@ def vege_temperature_query_db( cnx, query, cd, prefix = "" ):
 
     cursor.close()
 
-def sky_temperature_query_db( cnx, query, cd, prefix = "" ):
-    """
-    Perform a query of the database and update dictionary "cd" with the
-    results for the sky temp sensor
-    """
-
-    cursor = cnx.cursor()
-    cursor.execute(query)
-
-    for( sky_temperature ) in cursor:
-        if sky_temperature[0] is not None:
-            cd[prefix+"sky_temperature"] = "{:3.1f}".format(
-                sky_temperature[0])
-
-    cursor.close()
-
 
 env = Environment(
    loader=FileSystemLoader('/home/pi/GardenLabServer/cgi')
@@ -143,9 +97,7 @@ print( "Content-Type: text/html;charset=utf-8")
 print("")
 
 DATABASE_NAME="GardenLab"
-TABLE_NAME="GardenLabData"
 SM_TABLE_NAME="SoilMoistureData"
-SKY_TABLE_NAME="SkyTemperatureData"
 
 DAY_COND = " where ts > DATE_SUB( NOW(), INTERVAL 1 DAY )"
 WEEK_COND = " where ts > DATE_SUB( NOW(), INTERVAL 1 WEEK )"
@@ -155,8 +107,6 @@ YEAR_COND = " where ts > DATE_SUB( NOW(), INTERVAL 1 YEAR )"
 PERIODS = [("day",DAY_COND),("week",WEEK_COND),("month",MONTH_COND),
            ("year",YEAR_COND)]
 FUNCS = [("min","MIN"), ("max","MAX"), ("avg","AVG"), ("sum","SUM" )]
-
-
 
 
 context_dict = {}
@@ -170,30 +120,14 @@ pd = lines[0].split(" ")
 USER_NAME=pd[0].strip()
 PASSWD=pd[1].strip()
 
-
-
     
 cnx = mysql.connector.connect(user=USER_NAME, password=PASSWD,
                                  database=DATABASE_NAME )
 
-
-
-
 # Get the latest record in the database:
-latest_query = build_query( fields, TABLE_NAME, " ORDER BY id DESC LIMIT 1")
-query_db(cnx, latest_query, context_dict)
-
 vege_latest_query = build_query( vege_moisture_fields, SM_TABLE_NAME, 
  " WHERE station='MOIS01' AND has_temperature=0 ORDER BY id DESC LIMIT 1")
 vege_moisture_query_db(cnx, vege_latest_query, context_dict)
-
-vege_latest_query = build_query( vege_temperature_fields, SM_TABLE_NAME, 
- " WHERE station='MOIS01' AND has_temperature=1 ORDER BY id DESC LIMIT 1")
-vege_temperature_query_db(cnx, vege_latest_query, context_dict)
-
-sky_latest_query = build_query( sky_temperature_fields, SKY_TABLE_NAME, 
- " ORDER BY id DESC LIMIT 1")
-sky_temperature_query_db(cnx, sky_latest_query, context_dict)
 
 lemon_latest_query = build_query( lemon_moisture_fields, SM_TABLE_NAME, 
  " WHERE station='MOIS02' AND has_temperature=0 ORDER BY id DESC LIMIT 1")
@@ -204,26 +138,13 @@ lemon_moisture_query_db(cnx, lemon_latest_query, context_dict)
 
 for (plab,period) in PERIODS:
     for ( flab, func) in FUNCS:
-        query = build_query(fields, TABLE_NAME, period,func)
-        query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
-
         condition = "{} {}".format(period, "AND station='MOIS01' AND has_temperature=0")
         query = build_query(vege_moisture_fields, SM_TABLE_NAME, condition,func)
         vege_moisture_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
 
-        condition = "{} {}".format(period, "AND station='MOIS01' AND has_temperature=1")
-        query = build_query(vege_temperature_fields, SM_TABLE_NAME, 
-		condition,func)
-        vege_temperature_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
-
         condition = "{} {}".format(period, "AND station='MOIS02' AND has_temperature=0")
         query = build_query(lemon_moisture_fields, SM_TABLE_NAME, condition,func)
         lemon_moisture_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
-
-        condition = "{}".format(period)
-        query = build_query(sky_temperature_fields, SKY_TABLE_NAME, 
-            condition,func)
-        sky_temperature_query_db(cnx, query, context_dict, "%s_%s_"%(plab,flab))
 
 
 cnx.close()
