@@ -70,11 +70,17 @@ MOISTURE_EMAIL_NAMES = {
                 LEMON_KEY:   "lemon tree",
                 VEGE_KEY:    "vegetable garden"}
 
+def getDescriptiveName(key):
+    return MOISTURE_EMAIL_NAMES[key]
+
 
 # Thresholds - 
 MOISTURE_EMAIL_THRESHOLDS = { 
-                LEMON_KEY:   750,
-                VEGE_KEY:    780 };
+                LEMON_KEY:   800,
+                VEGE_KEY:    800 };
+
+def getThresholdValue(key):
+    return MOISTURE_EMAIL_THRESHOLDS[key]
 
 # Email addresses to be used for each moisture sensor:
 MOISTURE_EMAIL_ADDRESSES = { 
@@ -563,7 +569,6 @@ def send_moisture_email( address, station, threshold, value, key ):
     """
 
     # Temporary - remove with fixed
-    return
 
 
     sent_from = GMAIL_USER
@@ -614,9 +619,6 @@ def send_no_update_email( address, key):
     Send email to notify that no update has been 
     made for some time.
     """
-
-    # Temporary - remove when fixed
-    return
 
 
     station =  MOISTURE_EMAIL_NAMES[key]

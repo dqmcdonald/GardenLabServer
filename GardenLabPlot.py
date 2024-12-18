@@ -34,10 +34,13 @@ class PlotStyle(object):
         self.ymin = ymin
         self.ymax = ymax 
 
+field_names = {
+    "MOIS01": "vege_moisture",
+    "MOIS02": "lemon_moisture"}
 
 plot_defs = {
-     "vege_moisture": PlotStyle("#30e230", ymin=400,ymax=1000),
-     "lemon_moisture": PlotStyle("#e0e330", ymin=400,ymax=1000)}
+     "MOIS01": PlotStyle("#30e230", ymin=700,ymax=1100),
+     "MOIS02": PlotStyle("#e0e330", ymin=700,ymax=1100)}
 
 
 def cm2inch(*tupl):
@@ -49,7 +52,7 @@ def cm2inch(*tupl):
 
 
 def generate_24hr_plot(field, color='green', plot_type=PlotType.LINE,
-	ymin = None, ymax = None):
+	ymin = None, ymax = None, threshline = None):
     """
     Generate a 24 plot for the specified field
     """
@@ -72,6 +75,8 @@ def generate_24hr_plot(field, color='green', plot_type=PlotType.LINE,
         
     if plot_type == PlotType.LINE:
         ax.plot_date(dates,field_data,"-",color=color,lw=1.0)
+        if threshline is not None:
+           ax.axhline(y=threshline, color='r', linewidth=0.5, linestyle='--')
        
     elif plot_type == PlotType.HOURLY_BAR:
         hours = []
@@ -147,12 +152,13 @@ def generate_24hr_plot(field, color='green', plot_type=PlotType.LINE,
     plt.close()
 
 def generate_all_latest_plots():
-    for field in plot_defs.keys():
-        print(field)
-        generate_24hr_plot(field, plot_defs[field].face_color,
-                               plot_defs[field].plot_type,
-                               plot_defs[field].ymin,
-                               plot_defs[field].ymax
+    for key in plot_defs.keys():
+        print(GardenLabDB.getDescriptiveName(key))
+        generate_24hr_plot(field_names[key], plot_defs[key].face_color,
+                               plot_defs[key].plot_type,
+                               plot_defs[key].ymin,
+                               plot_defs[key].ymax,
+                               GardenLabDB.getThresholdValue(key)
 			)
 
 
